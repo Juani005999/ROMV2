@@ -62,14 +62,14 @@ Voici la liste des bibliothèques utilisées par l'application que vous devez in
 
 ### Configuration de l'application
 Vous pouvez accéder à la configuration de l'application via le fichier suivant : \
-\<Arduino librairies\> -> ROMV2 -> src -> **ROMV2_APP_CONFIG.h**
+\<*Arduino librairies*\> -> ROMV2 -> src -> **ROMV2_APP_CONFIG.h**
 ![ROMV2_APP_CONFIG.h](screenshots/ROMV2_APP_CONFIG.png)
 
 ### Configuration de l'écran TFT ST7735
 Afin de faire fonctionner votre écran, il vous sera nécessaire de le configurer via la bibliothèque **TFT_eSPI** en modifiant le fichier suivant : \
-\<Arduino librairies\> -> TFT_sSPI -> **User_Setup.h**
+\<*Arduino librairies*\> -> TFT_sSPI -> **User_Setup.h**
 
-Vous devrez modifier 2 paramètres :
+Vous devez modifier 2 paramètres :
 
 - La sélection de votre écran :
 ![TFT_eSPI Select Screen](screenshots/TFT_SelectScreen.png)
@@ -79,3 +79,19 @@ Vous devrez modifier 2 paramètres :
 ### Implémentation
 Pour démarrer un nouveau projet ROMV2, il vous suffit d'aller dans les examples de votre Arduino IDE, et de sélectionner **ROMV2**.
 ![ROMV2 Application example](screenshots/ROMV2.png)
+
+### Mode \"Debug\"
+Pendant le développement de votre projet, vous pouvez activer le mode **Debug**. Afin d'améliorer les performances, **n'oubliez pas de le désactiver une fois le fois le projet abouti**. \
+
+Dans le fichier suivant : \
+\<*Arduino librairies*\> -> ROMV2 -> src -> **JUANITO_APP.h** \
+Enlevez les commentaires devant la ligne : \
+`#define DEBUG`
+
+![ROMV2 Debug](screenshots/ROMV2_Debug.png)
+
+En activant le mode **Debug**, vous pourrez voir les traces de l'application dans le *Moniteur série* de votre *Arduino IDE* pendant l'exécution. 
+
+![ROMV2 Logs](screenshots/ROMV2_Log.png)
+
+## Driver ASCOM
