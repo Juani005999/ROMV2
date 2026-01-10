@@ -28,7 +28,7 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 | [TFT ST7735](https://www.amazon.fr/AZDelivery-TFT-Compatible-Raspberry-incluant/dp/B07TJGF8HS/ref=sr_1_1) | 27.99 € | 5 | 5.60 € |
 | [Joystick](https://www.amazon.fr/Gebildet-Joystick-Commande-Contr%C3%B4leur-Raspberry/dp/B0DPMN19G6/ref=sr_1_1_sspa) | 10.99 € | 8 | 1.37 € |
 | [Boot Button](https://www.amazon.fr/dp/B07S1MNB8C) | 10.99 € | 5 | 2.20 € |
-| | | Total | 76.08 € |
+| | | Total | **76.08 €** |
 
 ### Ali Express
 | Composant | Prix | Nb. pièces | Prix unitaire |
@@ -42,7 +42,7 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 | [TFT ST7735](https://fr.aliexpress.com/item/1005008974306385.html?spm=a2g0o.productlist.main.1.69deN3sMN3sMCK&aem_p4p_detail=20260110092555980857702899360011928963&algo_pvid=6bee107f-34fa-4179-b0e6-e06063f523cd&algo_exp_id=6bee107f-34fa-4179-b0e6-e06063f523cd-0&pdp_ext_f=%7B%22order%22%3A%22201%22%2C%22eval%22%3A%221%22%2C%22fromPage%22%3A%22search%22%7D&pdp_npi=6%40dis%21EUR%213.20%210.99%21%21%2125.40%217.84%21%402103847817680659550071490e715d%2112000047425743978%21sea%21FR%210%21ABX%211%210%21n_tag%3A-29910%3Bd%3A268baa35%3Bm03_new_user%3A-29895%3BpisId%3A5000000197682689&curPageLogUid=xHHqy2YoAtyq&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005008974306385%7C_p_origin_prod%3A&search_p4p_id=20260110092555980857702899360011928963_1) | 3.20 € | 1 | 3.20 € |
 | [Joystick](https://fr.aliexpress.com/item/1005009123774307.html?spm=a2g0o.productlist.main.2.844571abghArQ0&aem_p4p_detail=202601100928134145830235804040011530309&algo_pvid=89fbdaf8-fb4d-49ac-9e4e-6c98ab33126b&algo_exp_id=89fbdaf8-fb4d-49ac-9e4e-6c98ab33126b-1&pdp_ext_f=%7B%22order%22%3A%22158%22%2C%22eval%22%3A%221%22%2C%22fromPage%22%3A%22search%22%7D&pdp_npi=6%40dis%21EUR%210.51%210.51%21%21%210.58%210.58%21%402103956b17680660932575051e4923%2112000047996600701%21sea%21FR%210%21ABX%211%210%21n_tag%3A-29910%3Bd%3A268baa35%3Bm03_new_user%3A-29895&curPageLogUid=1X7S3y0vz51t&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005009123774307%7C_p_origin_prod%3A&search_p4p_id=202601100928134145830235804040011530309_1) | 0.51 € | 1 | 0.51 € |
 | [Boot Button](https://fr.aliexpress.com/item/1005007876916629.html?spm=a2g0o.productlist.main.10.73ef397fSy3LUu&aem_p4p_detail=202601100929212620692040343560011023458&algo_pvid=85067849-ce96-40d4-bcf8-23d93fe938f9&algo_exp_id=85067849-ce96-40d4-bcf8-23d93fe938f9-9&pdp_ext_f=%7B%22order%22%3A%2214%22%2C%22eval%22%3A%221%22%2C%22fromPage%22%3A%22search%22%7D&pdp_npi=6%40dis%21EUR%217.89%217.89%21%21%2162.62%2162.62%21%40211b819117680661610895672e553c%2112000042664114951%21sea%21FR%210%21ABX%211%210%21n_tag%3A-29910%3Bd%3A268baa35%3Bm03_new_user%3A-29895&curPageLogUid=isVvfGSpx5wR&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005007876916629%7C_p_origin_prod%3A&search_p4p_id=202601100929212620692040343560011023458_10) | 6.69 € | 5 | 1.34 € |
-| | | Total | 29.02 € |
+| | | Total | **29.02 €** |
 
 ## Firmware
 
