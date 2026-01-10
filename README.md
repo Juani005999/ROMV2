@@ -10,6 +10,8 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 
 ## Vidéos
 
+*TODO*
+
 ## Branchements
 
 ![Branchements](screenshots/ROMV2_Fritzing.png)
@@ -94,4 +96,10 @@ En activant le mode **Debug**, vous pourrez voir les traces de l'application dan
 
 ![ROMV2 Logs](screenshots/ROMV2_Log.png)
 
+## Montage
+
+*TODO*
+
 ## Driver ASCOM
+
+*En cours de développement*
