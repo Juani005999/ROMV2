@@ -135,7 +135,7 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 
 ![ESP32](screenshots/ESP32.jpg)
 
-[!WARNING] Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnelement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de part et d'autre afin d'augementer sa solidité.
+⚠️ Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnelement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de part et d'autre afin d'augementer sa solidité.
 
 ### Capteurs
 ![Capteurs](screenshots/Capteur_1.jpg)
