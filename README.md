@@ -17,12 +17,17 @@
     - [Boxes](#boxes)
     - [ESP32](#esp32)
     - [Capteurs](#capteurs)
+    - [Optique du TSL2591](#optique-du-tsl2591)
 - [Firmware](#firmware)
     - [Bibliothèques nécessaires à l'application](#bibliothèques-nécessaires-à-lapplication)
+    - [Paramètres de l'application dans Arduino IDE](#paramètres-de-lapplication-dans-arduino-ide)
     - [Configuration de l'application](#configuration-de-lapplication)
     - [Configuration de l'écran TFT ST7735](#configuration-de-lécran-tft-st7735)
     - [Implémentation](#implémentation)
     - [Mode \"Debug\"](#mode-debug)
+- [Utilisation](#utilisation)
+    - [Matériel](#matériel)
+    - [Logiciel](#logiciel)
 - [Driver ASCOM](#driver-ascom)
 
 ## Description
@@ -43,13 +48,14 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 - Lecture des conditions d'environnement (Température, taux d'humidité, pression atmosphérique) via le capteur BME280.
 - Calcul du point de rosée.
 - Niveaux à bulle permettant de diriger l'optique vers le zénith grâce au capteur ADXL345.
-- Coordonnées GPS et Date/Heure UTC issu du capteur GPS NEO 8M.
+- Coordonnées GPS et Date/Heure UTC issues du capteur GPS NEO 8M.
 - Connection Bluetooth BLE.
 - Driver ASCOM permettant de se connecter via Bluetooth BLE.
 - Indicateur de mesure de luminosité en cours.
 - Indicateur d'état d'une connection Bluetooth BLE client.
 - Indicateur d'état du GPS.
 - Indicateur de charge restante dans la batterie.
+- Mise en veille de l'écran après 5 minutes d'inactivité ou sur demande.
 
 ### Vidéo
 
@@ -104,13 +110,16 @@ Voici l'échelle de Bortle utilisée dans l'application.
 | --- | --- | --- |
 | Vis & rondelles | M4 x 20mm | 8 |
 | Vis & rondelles | M2 x 20mm | 4 |
-| Vis & rondelles | M2 x 8mm | 14 |
+| Vis & rondelles | M2 x 8mm | 17 |
 | Vis & rondelles | M2 x 6mm | 8 |
+| Ecrou Nylstop autobloquants | M2 | 3 |
 | Condensateur | 100 µF | 1 |
 | Condensateur céramique | 100 nF | 1 |
+| [PCB EPLZON](https://www.amazon.fr/dp/B0B5DCHM7K) | ... | 1 |
 | [Câbles Dupont](https://www.amazon.fr/Breadboard-Jumper-Wires-Dupont-Cable/dp/B0BTT48V7P) | ... | ... |
 | [PCB Vis Connecteur](https://www.amazon.fr/dp/B082ZNRQMJ?th=1) | ... | ... |
 | [Jumper Breadboard](https://www.amazon.fr/dp/B0F6LJS4L2?ref=ppx_yo2ov_dt_b_fed_asin_title) | ... | ... |
+| [Pile Rechargeable 18650](https://bestpiles.fr/piles-rechargeables-18650/991-pile-rechargeable-18650-inr18650mj1-li-ion-37v-3500mah-10a-8438493099829.html) | Li-ion 3,7V 3500mAh 10A | 1 |
 
 
 ## Montage
@@ -135,16 +144,24 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 
 ![ESP32](screenshots/ESP32.jpg)
 
-⚠️ Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnelement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de part et d'autre afin d'augementer sa solidité.
+⚠️ Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de partet d'autre du connecteur  afin d'augementer sa solidité.
 
 ### Capteurs
 ![Capteurs](screenshots/Capteur_1.jpg)
 ![Capteurs](screenshots/Capteur_2.jpg)
 
+#### Optique du TSL2591
+![TSL2591](screenshots/Optique_tsl2591_1.jpg)
+![TSL2591](screenshots/Optique_tsl2591_2.jpg)
+![TSL2591](screenshots/Optique_tsl2591_3.jpg)
+
+⚠️ La partie encadrée en jaune correspond au côté des vis du TSL2591.
+
+
 ## Firmware
 
-- Télécharger le fichier **ROMV2_LIB.zip**
-- Depuis votre Arduino IDE, installer la bibliothèque **ROMV2_LIB** via le menu : \
+- Télécharger le fichier **ROMV2_Firmware.zip**
+- Depuis votre Arduino IDE, installer la bibliothèque **ROMV2**, en sélectionnant le fichier téléchargé via le menu : \
 Croquis -> Importer une bibliothèque -> Ajouter la bibliothèque .ZIP ...
 ![ROMV2_LIB](screenshots/Instal_Lib.png)
 
@@ -156,6 +173,12 @@ Voici la liste des bibliothèques utilisées par l'application que vous devez in
 - Adafruit_MLX90614
 - Adafruit_ADXL345
 - TFT_eSPI
+
+### Paramètres de l'application dans Arduino IDE
+
+⚠️ Attention : l'application nécessite de se positionner en mode "Huge App" (cf. image ci-dessous), permettant ainsi de disposer de l'espace mémoire suffisant pour le fonctionnement sur l'ESP32.
+
+![Arduino IDE Huge App](screenshots/IDE_HugeApp.png)
 
 ### Configuration de l'application
 Vous pouvez accéder à la configuration de l'application via le fichier suivant : \
@@ -191,6 +214,30 @@ En activant le mode **Debug**, vous pourrez voir les traces de l'application dan
 
 ![ROMV2 Logs](screenshots/ROMV2_Log.png)
 
+## Utilisation
+
+### Matériel
+![ROMV2 Logs](screenshots/ROMV2_Bottom.jpg)
+
+Vous trouverez au bas du ROM V2 :
+- l'interrupteur On/Off de l'appareil.
+- 1 connecteur Micro USB permettant de recharger le ROM V2 et servant également à la mise à jour du firmware.
+- 1 interrupteur (bouton poussoir) permettant de mettre l'ESP en mode Boot lors de la mise à jour du firmware
+- L'indicateur de charge restante dans la batterie. Appuyez sur le bouton 'TEST' de l'indicateur pour connaître la charge restante.
+
+Le pilotage du ROM V2 s'effectue via le joystick :
+- Droite et gauche permettent de naviguer parmis les différents écrans.
+- Haut et Bas permettent un retour direct à l'écran d'accueil.
+- Sur l'écran d'acceuil, un clic sur le joystick permet d'alterner l'affichage Lux et SQM.
+- Sur l'écran de luminosité, un clic sur le joystick permet de réinitialiser la moyenne mobile en cours.
+- Un clic long sur le joystick permet de basculer l'écran en mode veille.
+
+### Logiciel
+
+![Screen Home Lux](screenshots/Screen_Home_Lux.png)
+
+![Screen Home SQM](screenshots/Screen_Home_sqm.png)
+
 ## Driver ASCOM
 
-*En cours de développement*
+*TODO*
