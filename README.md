@@ -203,7 +203,7 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 
 - Télécharger le fichier **ROMV2_Firmware.zip**
 - Depuis votre Arduino IDE, installer la bibliothèque **ROMV2**, en sélectionnant le fichier téléchargé via le menu : \
-Croquis -> Importer une bibliothèque -> Ajouter la bibliothèque .ZIP ...
+*Croquis* -> *Importer une bibliothèque* -> *Ajouter la bibliothèque .ZIP ...*
 
 ![ROMV2_LIB](screenshots/Instal_Lib.png)
 
@@ -231,7 +231,7 @@ Voici la liste des bibliothèques utilisées par l'application que vous devez in
 
 ### Configuration de l'application
 Vous pouvez accéder à la configuration de l'application via le fichier suivant : \
-\<*Arduino librairies*\> -> ROMV2 -> src -> **ROMV2_APP_CONFIG.h**
+\<*Arduino librairies*\> -> *ROMV2* -> *src* -> ***ROMV2_APP_CONFIG.h***
 
 ![ROMV2_APP_CONFIG.h](screenshots/ROMV2_APP_CONFIG.png)
 
@@ -239,7 +239,7 @@ Vous pouvez accéder à la configuration de l'application via le fichier suivant
 
 ### Configuration de l'écran TFT ST7735
 Afin de faire fonctionner votre écran, il vous sera nécessaire de le configurer via la bibliothèque **TFT_eSPI** en modifiant le fichier suivant : \
-\<*Arduino librairies*\> -> TFT_sSPI -> **User_Setup.h**
+\<*Arduino librairies*\> -> *TFT_sSPI* -> ***User_Setup.h***
 
 Vous devez modifier 2 paramètres :
 
@@ -261,7 +261,7 @@ Pour démarrer un nouveau projet ROMV2, il vous suffit d'aller dans les examples
 Pendant le développement de votre projet, vous pouvez activer le mode **Debug**. Afin d'améliorer les performances, **n'oubliez pas de le désactiver une fois le fois le projet abouti**.
 
 Dans le fichier suivant : \
-\<*Arduino librairies*\> -> ROMV2 -> src -> **JUANITO_APP.h** \
+\<*Arduino librairies*\> -> *ROMV2* -> *src* -> ***JUANITO_APP.h*** \
 Enlevez les commentaires devant la ligne : \
 `#define DEBUG`
 
