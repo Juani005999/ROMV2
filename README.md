@@ -177,8 +177,6 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 > [!WARNING]
 > Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de partet d'autre du connecteur  afin d'augementer sa solidité.
 
-⚠️ Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de partet d'autre du connecteur  afin d'augementer sa solidité.
-
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Capteurs
@@ -192,9 +190,11 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 ![TSL2591](screenshots/Optique_tsl2591_2.jpg)
 ![TSL2591](screenshots/Optique_tsl2591_3.jpg)
 
-⚠️ La partie encadrée en jaune correspond au côté des vis du TSL2591.
+> [!WARNING]
+> La partie encadrée en jaune correspond au côté des vis du TSL2591.
 
-ℹ️ La lentille est optionnelle. Vous pouvez uniquement positionner le cache du capteur et le tube sans la lentille. Vous pourrez ensuite corriger la [calibration](#calibration) si nécessaire.
+> [!TIP]
+> La lentille est optionnelle. Vous pouvez uniquement positionner le cache du capteur et le tube sans la lentille. Vous pourrez ensuite corriger la [calibration](#calibration) si nécessaire.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -220,7 +220,8 @@ Voici la liste des bibliothèques utilisées par l'application que vous devez in
 
 ### Paramètres de l'application dans Arduino IDE
 
-⚠️ Attention : l'application nécessite de se positionner en mode "Huge App" (cf. image ci-dessous), permettant ainsi de disposer de l'espace mémoire suffisant pour le fonctionnement sur l'ESP32.
+> [!WARNING]
+> Attention : l'application nécessite de se positionner en mode "Huge App" (cf. image ci-dessous), permettant ainsi de disposer de l'espace mémoire suffisant pour le fonctionnement sur l'ESP32.
 
 ![Arduino IDE Huge App](screenshots/IDE_HugeApp.png)
 
@@ -296,7 +297,8 @@ La constante de calibration est : `TSL2591_CALIBRATION`
 
 ![Calibration](screenshots/Calibration.png)
 
-⚠️ La calibration nécessaire avec la lentille donne par le calcul une valeure de 1.121, mais dans la pratique, la valeure de 0 donne des résultats plus cohérents. Vous pouvez également donner des valeurs négatives si nécessaire.
+> [!TIP]
+> La calibration nécessaire avec la lentille donne par le calcul une valeure de 1.121, mais dans la pratique, la valeure de 0 donne des résultats plus cohérents. Vous pouvez également donner des valeurs négatives si nécessaire.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -324,8 +326,9 @@ L'en-tête comprend les éléments suivants :
 - Un icone indiquant la présence d'une connexion client via Blutooth (2 états : rouge et vert).
 - Un icone indiquant si le GPS est "fixé", remontant ainsi les informations de localisation (2 états : rouge et vert). Est également précisé le nombre de sattelites à partir desquels le capteur récupère les informations. 
 
-⚠️ Pendant la prise de mesure de luminosité, le firmware est en attente du capteur, et ne prend aucune autre commande effectuée.
-Donc lorsque l'icone de prise de mesure de luminosité est allumé, il se peut que les commandes envoyées via le joystick ne soient pas correctement prise en compte.
+> [!WARNING]
+> Pendant la prise de mesure de luminosité, le firmware est en attente du capteur, et ne prend aucune autre commande effectuée.\
+> Donc lorsque l'icone de prise de mesure de luminosité est allumé, il se peut que les commandes envoyées via le joystick ne soient pas correctement prise en compte.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
