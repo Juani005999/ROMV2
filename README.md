@@ -27,7 +27,16 @@
     - [Mode \"Debug\"](#mode-debug)
 - [Utilisation](#utilisation)
     - [Matériel](#matériel)
+    - [Calibration](#calibration)
+    - [Mise en veille](#mise-en-veille)
     - [Logiciel](#logiciel)
+        - [En-tête](#en-tête)
+        - [Ecran d'accueil](#ecran-daccueil)
+        - [Ecran Luminosité](#ecran-luminosité)
+        - [Ecran Environnement](#ecran-environnement)
+        - [Ecran Ir Température](#ecran-ir-température)
+        - [Ecran Niveaux](#ecran-niveaux)
+        - [Ecran GPS](#ecran-gps)
 - [Driver ASCOM](#driver-ascom)
 
 ## Description
@@ -38,6 +47,8 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 - ADXL345
 - GPS NEO 8M
 - TFT ST7735
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Fonctionnalités
 
@@ -57,14 +68,20 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 - Indicateur de charge restante dans la batterie.
 - Mise en veille de l'écran après 5 minutes d'inactivité ou sur demande.
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Vidéo
 
 *TODO*
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Echelle de Bortle
 
 Voici l'échelle de Bortle utilisée dans l'application.
 ![Bortle Scale](screenshots/Bortle_Scale.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ## Liste des pièces
 ### Amazon
@@ -86,6 +103,8 @@ Voici l'échelle de Bortle utilisée dans l'application.
 | [Testeur de capacité](https://www.amazon.fr/dp/B0DKHT664R) | 13.19 € | 4 | 3.30 € |
 | | | Total | **125.54 €** |
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Ali Express
 | Composant | Prix | Nb. pièces | Prix unitaire |
 | --- | --- | --- | --- |
@@ -104,6 +123,8 @@ Voici l'échelle de Bortle utilisée dans l'application.
 | [Testeur de capacité](https://fr.aliexpress.com/item/1005006350742151.html) | 1.45 € | 1 | 1.45 € |
 | | | Total | **38.45 €** |
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Visserie & Divers
 
 | Composant | Propriétés | Quantité |
@@ -121,21 +142,30 @@ Voici l'échelle de Bortle utilisée dans l'application.
 | [Jumper Breadboard](https://www.amazon.fr/dp/B0F6LJS4L2?ref=ppx_yo2ov_dt_b_fed_asin_title) | ... | ... |
 | [Pile Rechargeable 18650](https://bestpiles.fr/piles-rechargeables-18650/991-pile-rechargeable-18650-inr18650mj1-li-ion-37v-3500mah-10a-8438493099829.html) | Li-ion 3,7V 3500mAh 10A | 1 |
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ## Montage
 
 ![Montage](screenshots/Montage.jpg)
 ![Montage](screenshots/Montage_2.jpg)
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Breadboard
 ![Breadboard](screenshots/ROMV2_Fritzing_1.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### PCB
 ![PCB](screenshots/ROMV2_Fritzing_2.png)
 ![PCB](screenshots/PCB.jpg)
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Boxes
 Vous trouverez dans [ce dossier](boxes) tous les fichiers STL nécessaires à l'impression 3D.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### ESP32
 Des branchements direct sur l'ESP32 sont nécessaires :
@@ -144,11 +174,18 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 
 ![ESP32](screenshots/ESP32.jpg)
 
+> [!WARNING]
+> Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de partet d'autre du connecteur  afin d'augementer sa solidité.
+
 ⚠️ Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de partet d'autre du connecteur  afin d'augementer sa solidité.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Capteurs
 ![Capteurs](screenshots/Capteur_1.jpg)
 ![Capteurs](screenshots/Capteur_2.jpg)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 #### Optique du TSL2591
 ![TSL2591](screenshots/Optique_tsl2591_1.jpg)
@@ -157,6 +194,9 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 
 ⚠️ La partie encadrée en jaune correspond au côté des vis du TSL2591.
 
+ℹ️ La lentille est optionnelle. Vous pouvez uniquement positionner le cache du capteur et le tube sans la lentille. Vous pourrez ensuite corriger la [calibration](#calibration) si nécessaire.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ## Firmware
 
@@ -164,6 +204,8 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 - Depuis votre Arduino IDE, installer la bibliothèque **ROMV2**, en sélectionnant le fichier téléchargé via le menu : \
 Croquis -> Importer une bibliothèque -> Ajouter la bibliothèque .ZIP ...
 ![ROMV2_LIB](screenshots/Instal_Lib.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Bibliothèques nécessaires à l'application
 Voici la liste des bibliothèques utilisées par l'application que vous devez installer via le gestionnaire de librairies dans votre Arduino IDE :
@@ -174,16 +216,22 @@ Voici la liste des bibliothèques utilisées par l'application que vous devez in
 - Adafruit_ADXL345
 - TFT_eSPI
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Paramètres de l'application dans Arduino IDE
 
 ⚠️ Attention : l'application nécessite de se positionner en mode "Huge App" (cf. image ci-dessous), permettant ainsi de disposer de l'espace mémoire suffisant pour le fonctionnement sur l'ESP32.
 
 ![Arduino IDE Huge App](screenshots/IDE_HugeApp.png)
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Configuration de l'application
 Vous pouvez accéder à la configuration de l'application via le fichier suivant : \
 \<*Arduino librairies*\> -> ROMV2 -> src -> **ROMV2_APP_CONFIG.h**
 ![ROMV2_APP_CONFIG.h](screenshots/ROMV2_APP_CONFIG.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Configuration de l'écran TFT ST7735
 Afin de faire fonctionner votre écran, il vous sera nécessaire de le configurer via la bibliothèque **TFT_eSPI** en modifiant le fichier suivant : \
@@ -196,9 +244,14 @@ Vous devez modifier 2 paramètres :
 - Les PINs associés à votre écran :
 ![TFT_eSPI Select PINs](screenshots/TFT_SelectPins.png)
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Implémentation
 Pour démarrer un nouveau projet ROMV2, il vous suffit d'aller dans les examples de votre Arduino IDE, et de sélectionner **ROMV2**.
+
 ![ROMV2 Application example](screenshots/ROMV2_ino.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Mode \"Debug\"
 Pendant le développement de votre projet, vous pouvez activer le mode **Debug**. Afin d'améliorer les performances, **n'oubliez pas de le désactiver une fois le fois le projet abouti**.
@@ -214,6 +267,8 @@ En activant le mode **Debug**, vous pourrez voir les traces de l'application dan
 
 ![ROMV2 Logs](screenshots/ROMV2_Log.png)
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ## Utilisation
 
 ### Matériel
@@ -222,7 +277,7 @@ En activant le mode **Debug**, vous pourrez voir les traces de l'application dan
 Vous trouverez au bas du ROM V2 :
 - l'interrupteur On/Off de l'appareil.
 - 1 connecteur Micro USB permettant de recharger le ROM V2 et servant également à la mise à jour du firmware.
-- 1 interrupteur (bouton poussoir) permettant de mettre l'ESP en mode Boot lors de la mise à jour du firmware
+- 1 interrupteur (bouton poussoir) permettant de mettre l'ESP en mode Boot lors de la mise à jour du firmware.
 - L'indicateur de charge restante dans la batterie. Appuyez sur le bouton 'TEST' de l'indicateur pour connaître la charge restante.
 
 Le pilotage du ROM V2 s'effectue via le joystick :
@@ -232,11 +287,147 @@ Le pilotage du ROM V2 s'effectue via le joystick :
 - Sur l'écran de luminosité, un clic sur le joystick permet de réinitialiser la moyenne mobile en cours.
 - Un clic long sur le joystick permet de basculer l'écran en mode veille.
 
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Calibration
+
+Dans le fichier de configuration, vous trouverez une constante définie permettant de calibrer le ROM V2 dans sa lecture de luminosité via le TSL2591.
+La constante de calibration est : `TSL2591_CALIBRATION`
+
+![Calibration](screenshots/Calibration.png)
+
+⚠️ La calibration nécessaire avec la lentille donne par le calcul une valeure de 1.121, mais dans la pratique, la valeure de 0 donne des résultats plus cohérents. Vous pouvez également donner des valeurs négatives si nécessaire.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Mise en veille
+
+L'écran du ROM V2 s'éteint automatiquement après 5 min d'inactivité (modifiable dans le fichier de configuration).
+Cette mise en veille peut être déclenchée à tout moment par un "click long" sur le joystick.
+
+Pour sortir du mode veille, il suffit d'effectuer une action sur le joystick, peut importe laquelle.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ### Logiciel
+
+Le firmware est constitué de 6 écrans, avec un en-tête commun à tous les écrans.
+
+#### En-tête
+
+![Header](screenshots/Header.png)
+
+L'en-tête comprend les éléments suivants :
+- Un icone principal spécifique à l'écran en cours d'affichage.
+- La date et l'heure UTC remontée par le capteur GPS.
+- Un icone indiquant qu'une prise de mesure de la luminosité est en cours.
+- Un icone indiquant la présence d'une connexion client via Blutooth (2 états : rouge et vert).
+- Un icone indiquant si le GPS est "fixé", remontant ainsi les informations de localisation (2 états : rouge et vert). Est également précisé le nombre de sattelites à partir desquels le capteur récupère les informations. 
+
+⚠️ Pendant la prise de mesure de luminosité, le firmware est en attente du capteur, et ne prend aucune autre commande effectuée.
+Donc lorsque l'icone de prise de mesure de luminosité est allumé, il se peut que les commandes envoyées via le joystick ne soient pas correctement prise en compte.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Ecran d'accueil
+
+L'écran d'accueil comprend les éléments suivants :
+- L'affichage des coordonnées GPS.
+- Un icone représentant l'état du ciel. L'icone à trois états : 
+    - Ciel clair.
+    - Peu nuageux.
+    - Nuageux.
+- Un icone représentant le point de rosée ainsi que la température du point de rosée. L'icone à trois états :
+    - Bleu : pas de risque de rosée.
+    - Orange : point de rosée à moins de 5°c de la température ambiante, risque de buée imminente.
+    - Rouge : point de rosée atteint, pare-buée obligatoire.
+- Un icone affichant la valeur de Bortle en cours.
+- Un espace affichant la valeur de luminosité mesurée. 2 modes d'affichage :
+    - Affichage du Lux
+    - Affichage du SQM (Mag / Arcsec²).\
+    On passe d'un mode à l'autre en cliquant sur le joystick.
+- Un espace affichant la valeur de la température ambiante.
 
 ![Screen Home Lux](screenshots/Screen_Home_Lux.png)
 
-![Screen Home SQM](screenshots/Screen_Home_sqm.png)
+![Screen Home SQM](screenshots/Screen_Home_SQM.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Ecran Luminosité
+
+![Screen Lux](screenshots/Screen_Lux.png)
+
+L'écran Luminosité comprend les éléments suivants :
+- La luminosité mesurée totale et dans les Infrarouge.
+- La luminosité mesurée dans le visible.
+- La quantité de Lux issue des mesures Ir et Full.
+- La quantité de Lux sur une moyenne mobile. Le nombre de mesures permettant de calculer la moyenne est entre parenthèse. Le nombre maximum de valeurs pour le calcul de la moyenne mobile est de 50 (ce nombre est modifiable dans le fichier de configuration via la constante `TSL2591_MOVING_AVERAGE_COUNT`).
+- Le SQM (Mag / Arcsec²) calculé à partir du Lux moyen.
+- Le Bortle issu de la valeur du SQM calculé.
+- Le gain du capteur lors de la dernière mesure de luminosité effectuée.
+- Le temps d'exposition du capteur lors de la dernière mesure de luminosité effectué.
+
+> [!NOTE]
+> Le gain et le temps d'exposition du capteur sont réglé automatiquement par le firmware afin d'avoir les valeurs les plus appropriées en fonction du contexte.
+
+> [!IMPORTANT]
+> Pour réinitialiser la moyenne mobile effectuée sur la mesure de Lux, il suffit d'effectuer un clic sur le joystick.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Ecran Environnement
+
+![Screen Lux](screenshots/Screen_Environment.png)
+
+L'écran Environnement comprend les éléments suivants :
+- La température ambiante (°C).
+- Le taux d'humidité (%).
+- La pression atmosphérique (Pa).
+- Un icone représentant le point de rosée ainsi que la température du point de rosée. L'icone à trois états :
+    - Bleu : pas de risque de rosée.
+    - Orange : point de rosée à moins de 5°c de la température ambiante, risque de buée imminente.
+    - Rouge : point de rosée atteint, pare-buée obligatoire.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Ecran Ir Température
+
+![Screen Lux](screenshots/Screen_IrTemp.png)
+
+L'écran Ir Température permet d'afficher l'état du ciel. Il comprend les éléments suivants :
+- Un icone représentant l'état du ciel. L'icone à trois états : 
+    - Ciel clair.
+    - Peu nuageux.
+    - Nuageux.
+- La température ambiante mesurée.
+- La température de l'objet mesurée.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Ecran Niveaux
+
+![Screen Lux](screenshots/Screen_Niveaux.png)
+
+L'écran Niveaux permet d'afficher un niveau à bulle afin de positionner correctment le capteur de luminosité au zénith. Il comprend les éléments suivants :
+- Un niveau à bulle de forme circulaire.
+- L'accélération en X (m / s²).
+- L'accélération en Y (m / s²).
+- L'accélération en Z (m / s²).
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Ecran GPS
+
+![Screen Lux](screenshots/Screen_GPS.png)
+
+L'écran GPS permet d'afficher les données issues du GPS. Il comprend les éléments suivants :
+- Les coordonnées en degrés, minutes, secondes et dizaines de secondes, orientation, en longitude et latitude.
+- Le nombre de sattelites à partir desquels le capteur GPS récupère les informations.
+- L'état "fixé" ou non.
+- L'altitude courante (m).
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ## Driver ASCOM
 
