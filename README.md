@@ -79,6 +79,7 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 ### Echelle de Bortle
 
 Voici l'échelle de Bortle utilisée dans l'application.
+
 ![Bortle Scale](screenshots/Bortle_Scale.png)
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
@@ -309,7 +310,7 @@ La constante de calibration est : `TSL2591_CALIBRATION`
 L'écran du ROM V2 s'éteint automatiquement après 5 min d'inactivité (modifiable dans le fichier de configuration).
 Cette mise en veille peut être déclenchée à tout moment par un "click long" sur le joystick.
 
-Pour sortir du mode veille, il suffit d'effectuer une action sur le joystick, peut importe laquelle.
+Pour sortir du mode veille, il suffit d'effectuer une action sur le joystick, peu importe laquelle.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -418,7 +419,7 @@ L'écran Ir Température permet d'afficher l'état du ciel. Il comprend les él�
 
 ![Screen Lux](screenshots/Screen_Niveaux.png)
 
-L'écran Niveaux permet d'afficher un niveau à bulle afin de positionner correctment le capteur de luminosité au zénith. Il comprend les éléments suivants :
+L'écran Niveaux permet d'afficher un niveau à bulle afin de positionner correctement le capteur de luminosité au zénith. Il comprend les éléments suivants :
 - Un niveau à bulle de forme circulaire.
 - L'accélération en X (m / s²).
 - L'accélération en Y (m / s²).
@@ -431,7 +432,7 @@ L'écran Niveaux permet d'afficher un niveau à bulle afin de positionner correc
 ![Screen Lux](screenshots/Screen_GPS.png)
 
 L'écran GPS permet d'afficher les données issues du GPS. Il comprend les éléments suivants :
-- Les coordonnées en degrés, minutes, secondes et dizaines de secondes, orientation, en longitude et latitude.
+- Les coordonnées longitude et latitude en degrés, minutes, secondes et dizaines de secondes, orientation.
 - Le nombre de satellites à partir desquels le capteur GPS récupère les informations.
 - L'état "fixé" ou non.
 - L'altitude courante (m).
