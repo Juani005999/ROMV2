@@ -163,7 +163,7 @@ Voici l'échelle de Bortle utilisée dans l'application.
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Boxes
-Vous trouverez dans [ce dossier](boxes) tous les fichiers STL nécessaires à l'impression 3D.
+Vous trouverez dans [ce dossier](./Boxes/) tous les fichiers STL nécessaires à l'impression 3D.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
