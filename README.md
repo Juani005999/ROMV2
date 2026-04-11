@@ -372,13 +372,13 @@ L'écran Luminosité comprend les éléments suivants :
 - Le SQM (Mag / Arcsec²) calculé à partir du Lux moyen.
 - Le Bortle issu de la valeur du SQM calculé.
 - Le gain du capteur lors de la dernière mesure de luminosité effectuée.
-- Le temps d'exposition du capteur lors de la dernière mesure de luminosité effectué.
+- Le temps d'exposition du capteur lors de la dernière mesure de luminosité effectuée.
 
 > [!NOTE]
-> Le gain et le temps d'exposition du capteur sont réglé automatiquement par le firmware afin d'avoir les valeurs les plus appropriées en fonction du contexte.
+> Le gain et le temps d'exposition du capteur sont ajustés automatiquement par le firmware afin d'avoir les valeurs les plus appropriées en fonction du contexte.
 
 > [!IMPORTANT]
-> Pour réinitialiser la moyenne mobile effectuée sur la mesure de Lux, il suffit d'effectuer un clic sur le joystick.
+> Pour réinitialiser la moyenne mobile effectuée sur la mesure de Lux, il suffit d'effectuer un **clic sur le joystick**.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -403,9 +403,12 @@ L'écran Environnement comprend les éléments suivants :
 
 L'écran Ir Température permet d'afficher l'état du ciel. Il comprend les éléments suivants :
 - Un icone représentant l'état du ciel. L'icone à trois états : 
-    - Ciel clair.
-    - Peu nuageux.
-    - Nuageux.
+    - Ciel clair.\
+    ![Sky State Clear](screenshots/SkyState_Clear.png)
+    - Peu nuageux.\
+    ![Sky State Partly Cloudy](screenshots/SkyState_PartlyCloudy.png)
+    - Nuageux.\
+    ![Sky State Cloudy](screenshots/SkyState_Cloudy.png)
 - La température ambiante mesurée.
 - La température de l'objet mesurée.
 
