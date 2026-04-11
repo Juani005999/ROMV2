@@ -175,7 +175,7 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 ![ESP32](screenshots/ESP32.jpg)
 
 > [!WARNING]
-> Attention, le connecteur micro USB présent sur l'ESP est très très fragile (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de partet d'autre du connecteur  afin d'augementer sa solidité.
+> Attention, le connecteur **micro USB** présent sur l'ESP est **très très fragile** (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de partet d'autre du connecteur  afin d'augementer sa solidité.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -203,6 +203,7 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 - Télécharger le fichier **ROMV2_Firmware.zip**
 - Depuis votre Arduino IDE, installer la bibliothèque **ROMV2**, en sélectionnant le fichier téléchargé via le menu : \
 Croquis -> Importer une bibliothèque -> Ajouter la bibliothèque .ZIP ...
+
 ![ROMV2_LIB](screenshots/Instal_Lib.png)
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
@@ -221,7 +222,7 @@ Voici la liste des bibliothèques utilisées par l'application que vous devez in
 ### Paramètres de l'application dans Arduino IDE
 
 > [!WARNING]
-> Attention : l'application nécessite de se positionner en mode "Huge App" (cf. image ci-dessous), permettant ainsi de disposer de l'espace mémoire suffisant pour le fonctionnement sur l'ESP32.
+> Attention : l'application nécessite de se positionner en mode **"Huge App"** (cf. image ci-dessous), permettant ainsi de disposer de l'espace mémoire suffisant pour le fonctionnement sur l'ESP32.
 
 ![Arduino IDE Huge App](screenshots/IDE_HugeApp.png)
 
@@ -230,6 +231,7 @@ Voici la liste des bibliothèques utilisées par l'application que vous devez in
 ### Configuration de l'application
 Vous pouvez accéder à la configuration de l'application via le fichier suivant : \
 \<*Arduino librairies*\> -> ROMV2 -> src -> **ROMV2_APP_CONFIG.h**
+
 ![ROMV2_APP_CONFIG.h](screenshots/ROMV2_APP_CONFIG.png)
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
@@ -279,7 +281,7 @@ Vous trouverez au bas du ROM V2 :
 - l'interrupteur On/Off de l'appareil.
 - 1 connecteur Micro USB permettant de recharger le ROM V2 et servant également à la mise à jour du firmware.
 - 1 interrupteur (bouton poussoir) permettant de mettre l'ESP en mode Boot lors de la mise à jour du firmware.
-- L'indicateur de charge restante dans la batterie. Appuyez sur le bouton 'TEST' de l'indicateur pour connaître la charge restante.
+- L'indicateur de charge restante dans la batterie. Appuyez sur le bouton **"TEST"** de l'indicateur pour connaître la charge restante.
 
 Le pilotage du ROM V2 s'effectue via le joystick :
 - Droite et gauche permettent de naviguer parmis les différents écrans.
@@ -324,10 +326,10 @@ L'en-tête comprend les éléments suivants :
 - La date et l'heure UTC remontée par le capteur GPS.
 - Un icone indiquant qu'une prise de mesure de la luminosité est en cours.
 - Un icone indiquant la présence d'une connexion client via Blutooth (2 états : rouge et vert).
-- Un icone indiquant si le GPS est "fixé", remontant ainsi les informations de localisation (2 états : rouge et vert). Est également précisé le nombre de sattelites à partir desquels le capteur récupère les informations. 
+- Un icone indiquant si le GPS est "fixé", remontant ainsi les informations de localisation (2 états : rouge et vert). Est également précisé le nombre de satellites à partir desquels le capteur récupère les informations. 
 
 > [!WARNING]
-> Pendant la prise de mesure de luminosité, le firmware est en attente du capteur, et ne prend aucune autre commande effectuée.\
+> Pendant la prise de mesure de luminosité, le firmware est en attente du capteur, et ne prend aucune autre commande.\
 > Donc lorsque l'icone de prise de mesure de luminosité est allumé, il se peut que les commandes envoyées via le joystick ne soient pas correctement prise en compte.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
@@ -341,14 +343,15 @@ L'écran d'accueil comprend les éléments suivants :
     - Peu nuageux.
     - Nuageux.
 - Un icone représentant le point de rosée ainsi que la température du point de rosée. L'icone à trois états :
-    - Bleu : pas de risque de rosée.
+    - Bleu : pas de risque de buée.
     - Orange : point de rosée à moins de 5°c de la température ambiante, risque de buée imminente.
     - Rouge : point de rosée atteint, pare-buée obligatoire.
 - Un icone affichant la valeur de Bortle en cours.
 - Un espace affichant la valeur de luminosité mesurée. 2 modes d'affichage :
     - Affichage du Lux
     - Affichage du SQM (Mag / Arcsec²).\
-    On passe d'un mode à l'autre en cliquant sur le joystick.
+    > [!TIP]
+    > On passe d'un mode à l'autre (Lux / SQM) en cliquant sur le joystick.
 - Un espace affichant la valeur de la température ambiante.
 
 ![Screen Home Lux](screenshots/Screen_Home_Lux.png)
@@ -388,7 +391,7 @@ L'écran Environnement comprend les éléments suivants :
 - Le taux d'humidité (%).
 - La pression atmosphérique (Pa).
 - Un icone représentant le point de rosée ainsi que la température du point de rosée. L'icone à trois états :
-    - Bleu : pas de risque de rosée.
+    - Bleu : pas de risque de buée.
     - Orange : point de rosée à moins de 5°c de la température ambiante, risque de buée imminente.
     - Rouge : point de rosée atteint, pare-buée obligatoire.
 
@@ -426,7 +429,7 @@ L'écran Niveaux permet d'afficher un niveau à bulle afin de positionner correc
 
 L'écran GPS permet d'afficher les données issues du GPS. Il comprend les éléments suivants :
 - Les coordonnées en degrés, minutes, secondes et dizaines de secondes, orientation, en longitude et latitude.
-- Le nombre de sattelites à partir desquels le capteur GPS récupère les informations.
+- Le nombre de satellites à partir desquels le capteur GPS récupère les informations.
 - L'état "fixé" ou non.
 - L'altitude courante (m).
 
