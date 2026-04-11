@@ -350,8 +350,8 @@ L'écran d'accueil comprend les éléments suivants :
 - Un espace affichant la valeur de luminosité mesurée. 2 modes d'affichage :
     - Affichage du Lux
     - Affichage du SQM (Mag / Arcsec²).\
-    > [!TIP]
-    > On passe d'un mode à l'autre (Lux / SQM) en cliquant sur le joystick.
+> [!TIP]
+> On passe d'un mode à l'autre (Lux / SQM) en cliquant sur le joystick.
 - Un espace affichant la valeur de la température ambiante.
 
 ![Screen Home Lux](screenshots/Screen_Home_Lux.png)
