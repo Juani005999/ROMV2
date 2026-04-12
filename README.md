@@ -38,6 +38,11 @@
         - [Ecran Niveaux](#ecran-niveaux)
         - [Ecran GPS](#ecran-gps)
 - [Driver ASCOM](#driver-ascom)
+    - [Installation](#installation)
+    - [Détection du périphérique bluetooth dans Windows](#détection-du-périphérique-bluetooth-dans-windows)
+    - [Utilisation dans NINA](#utilisation-dans-nina)
+        - [Sélection du ROM V2 dans NINA](#sélection-du-rom-v2-dans-nina)
+        - [Première utilisation dans NINA](#première-utilisation-dans-nina)
 
 ## Description
 Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
@@ -441,4 +446,65 @@ L'écran GPS permet d'afficher les données issues du GPS. Il comprend les élé
 
 ## Driver ASCOM
 
-*TODO*
+![Driver Setup Dialog](screenshots/Driver_SetupDialog.png)
+
+### Installation
+
+- Téléchargez et exécutez le fichier **RemoteOpenMeteoV2-SQM Setup.exe**
+
+![Driver Installer screen 1](screenshots/Installer_1.png)
+
+![Driver Installer screen 2](screenshots/Installer_2.png)
+
+![Driver Installer screen 3](screenshots/Installer_3.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Détection du périphérique bluetooth dans Windows
+
+Afin de pouvoir utiliser le Driver ASCOM ROM V2 - SQM depuis votre application Astro comme N.I.N.A., vous devez au préalable déclarer votre périphérique Bluetooth auprès de votre système Windows.
+
+> [!IMPORTANT]
+> Cette opération de reconnaissance de vore périphérique Bluetooth auprès de votre système Windows n'est à faire qu'une seule fois, lors de la première utilisation.
+
+![Windows bluetooth](screenshots/Windows%20bluetooth.png)
+
+Dans la fenêtre des paramètres windows, allez dans la section "***Bluetooth et appareils***", si nécessaire, cliquez sur "***Afficher d'autres périphériques***", puis cliquez sur le bouton "***Ajouter un appareil***" et suivez les étapes de l'assistant.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Utilisation dans NINA
+
+![NINA](screenshots/NINA%20Connected.png)
+
+#### Sélection du ROM V2 dans NINA
+
+Afin de sélectionner le ROM V2 - SQM dans N.I.N.A., allez dans l'onglet "***Equipements***", et dans le sous-onglet "***Météo***".\
+Dans la liste déroulante, sélectionnez "***ROM V2 - Sky Quality Meter***"
+
+![NINA Sélection ROM](screenshots/NINA%20Select%20ROMV2.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Première utilisation dans NINA
+
+Lors de la première utilisation dans N.I.N.A., un appairage du ROM V2 - SQM est nécessaire.\
+Pour cela, cliquez sur le bouton "***Paramètres***".
+
+![NINA ROM settings](screenshots/NINA%20Toolbar.png)
+
+Dans la boîte de dialogue qui s'ouvre, sélectionnez le périphérique "***REMOTE OPEN METEO***" détecté puis validez.
+
+![Driver Setup Dialog](screenshots/Driver_SetupDialog.png)
+
+> [!NOTE]
+> Voilà, l'appairage est effectué. Il ne sera plus nécessaire d'effectuer cette opération lors des prochaines utilisation.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+Voilà, vous pouvez désormais profiter des données du ROM V2 - SQM dans NINA.\
+Enjoy
+
+![NINA démo](screenshots/NINA%20demo.png)
+
+<p align="right"><b><i>Juanito del Pepito</i></b></p>
