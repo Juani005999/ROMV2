@@ -465,7 +465,7 @@ L'écran GPS permet d'afficher les données issues du GPS. Il comprend les élé
 Afin de pouvoir utiliser le Driver ASCOM ROM V2 - SQM depuis votre application Astro comme N.I.N.A., vous devez au préalable déclarer votre périphérique Bluetooth auprès de votre système Windows.
 
 > [!IMPORTANT]
-> Cette opération de reconnaissance de vore périphérique Bluetooth auprès de votre système Windows n'est à faire qu'une seule fois, lors de la première utilisation.
+> Cette opération de reconnaissance de votre périphérique Bluetooth auprès de votre système Windows n'est à faire qu'une seule fois, lors de la première utilisation.
 
 ![Windows bluetooth](screenshots/Windows%20bluetooth.png)
 
@@ -498,7 +498,7 @@ Dans la boîte de dialogue qui s'ouvre, sélectionnez le périphérique "***REMO
 ![Driver Setup Dialog](screenshots/Driver_SetupDialog.png)
 
 > [!NOTE]
-> Voilà, l'appairage est effectué. Il ne sera plus nécessaire d'effectuer cette opération lors des prochaines utilisation.
+> Voilà, l'appairage est effectué. Il ne sera plus nécessaire d'effectuer cette opération lors des prochaines utilisations.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
