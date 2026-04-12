@@ -5,7 +5,6 @@
 ## Sommaire
 - [Description](#description)
     - [Fonctionnalités](#fonctionnalités)
-    - [Vidéo](#vidéo)
     - [Echelle de Bortle](#echelle-de-bortle)
 - [Liste des pièces](#liste-des-pièces)
     - [Amazon](#amazon)
@@ -72,12 +71,6 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 - Indicateur d'état du GPS.
 - Indicateur de charge restante dans la batterie.
 - Mise en veille de l'écran après 5 minutes d'inactivité ou sur demande.
-
-<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
-
-### Vidéo
-
-*TODO*
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
