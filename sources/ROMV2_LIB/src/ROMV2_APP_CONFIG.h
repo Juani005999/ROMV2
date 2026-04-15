@@ -84,7 +84,7 @@
 #define TSL2591_SENSOR_VALUE_LOW				750						// Niveau bas du sensor => augmentation de la sensibilité du sensor si valeur en dessous
 #define TSL2591_SENSOR_VALUE_HIGH				20000					// Niveau haut du sensor => diminution de la sensibilité du sensor si valeur au dessus
 #define TSL2591_CALIBRATION						0						// Valeur servant à la calibration du TSL2591 : le calcul donne 1.121, la pratique donne 0
-#define MIN_LUX_THRESHOLD						0.0001f					// Seuil minimum de lux valide (en dessous = bruit capteur)
+#define MIN_LUX_THRESHOLD						0.00005f				// Seuil minimum de lux valide (en dessous = bruit capteur)
 #define TSL2591_MOVING_AVERAGE_COUNT			50						// Nombre de valeurs pour le calcul de la moyenne mobile du Lux
 
 // Définition des constantes pour la calibration de l'état du ciel
