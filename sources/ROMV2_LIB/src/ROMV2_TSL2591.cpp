@@ -364,39 +364,39 @@ void ROMV2_TSL2591::UpdateBortle()
     if (!isnan(_dataLuminosity->sqm) && !isinf(_dataLuminosity->sqm))
     {
         // Positionnement du Bortle selon une échelle de valeur de SQM
-        if (_dataLuminosity->sqm > 22.2)
+        if (_dataLuminosity->sqm > 21.995)
         {
             _dataLuminosity->bortle = 1;
         }
-        else if (_dataLuminosity->sqm > 22)
+        else if (_dataLuminosity->sqm > 21.99)
         {
             _dataLuminosity->bortle = 1.5;
         }
-        else if (_dataLuminosity->sqm > 21.75)
+        else if (_dataLuminosity->sqm > 21.94)
         {
             _dataLuminosity->bortle = 2;
         }
-        else if (_dataLuminosity->sqm > 21.5)
+        else if (_dataLuminosity->sqm > 21.89)
         {
             _dataLuminosity->bortle = 2.5;
         }
-        else if (_dataLuminosity->sqm > 21.25)
+        else if (_dataLuminosity->sqm > 21.79)
         {
             _dataLuminosity->bortle = 3;
         }
-        else if (_dataLuminosity->sqm > 21)
+        else if (_dataLuminosity->sqm > 21.69)
         {
             _dataLuminosity->bortle = 3.5;
         }
-        else if (_dataLuminosity->sqm > 20.6)
+        else if (_dataLuminosity->sqm > 21.25)
         {
             _dataLuminosity->bortle = 4;
         }
-        else if (_dataLuminosity->sqm > 20.3)
+        else if (_dataLuminosity->sqm > 20.49)
         {
             _dataLuminosity->bortle = 4.5;
         }
-        else if (_dataLuminosity->sqm > 19.8)
+        else if (_dataLuminosity->sqm > 20)
         {
             _dataLuminosity->bortle = 5;
         }
@@ -404,27 +404,27 @@ void ROMV2_TSL2591::UpdateBortle()
         {
             _dataLuminosity->bortle = 5.5;
         }
-        else if (_dataLuminosity->sqm > 19)
+        else if (_dataLuminosity->sqm > 19.22)
         {
             _dataLuminosity->bortle = 6;
         }
-        else if (_dataLuminosity->sqm > 18.5)
+        else if (_dataLuminosity->sqm > 18.94)
         {
             _dataLuminosity->bortle = 6.5;
         }
-        else if (_dataLuminosity->sqm > 18.25)
+        else if (_dataLuminosity->sqm > 18.66)
         {
             _dataLuminosity->bortle = 7;
         }
-        else if (_dataLuminosity->sqm > 18)
+        else if (_dataLuminosity->sqm > 18.38)
         {
             _dataLuminosity->bortle = 7.5;
         }
-        else if (_dataLuminosity->sqm > 17.75)
+        else if (_dataLuminosity->sqm > 18.16)
         {
             _dataLuminosity->bortle = 8;
         }
-        else if (_dataLuminosity->sqm > 17.5)
+        else if (_dataLuminosity->sqm > 17.94)
         {
             _dataLuminosity->bortle = 8.5;
         }
