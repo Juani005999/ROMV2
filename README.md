@@ -515,4 +515,3 @@ Enjoy
 | Date | Version | Commentaires |
 | --- | --- | --- |
 | 08/05/2026 | 2.0.1.1 | Lecture de la luminosité dans une tâche dédiée FreeRTOS s'exécutant en paralèlle sur le 2ème coeur de l'ESP 32 |
-| | | |
