@@ -74,6 +74,7 @@ void ROMV2_DISPLAY_HEADER::ClearDisplay()
 
 		// Contour de l'icone de luminosité
 		_tft->drawCircle(102, 16, 8, TFT_MAROON);
+		SetLuminosityIcon(lastLuminosityIconState);
 	}
 }
 
@@ -234,5 +235,6 @@ void ROMV2_DISPLAY_HEADER::SetLuminosityIcon(bool on)
 		_tft->drawCircle(102, 16, 8, TFT_MAROON);
 		_tft->fillCircle(102, 16, 6, on ? TFT_ORANGE : TFT_WHITE);
 	}
+	lastLuminosityIconState = on;
 	firstLuminosityIcon = false;
 }

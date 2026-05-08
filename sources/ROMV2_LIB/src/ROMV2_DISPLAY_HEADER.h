@@ -63,4 +63,5 @@ class ROMV2_DISPLAY_HEADER
     bool _iconGPSLastState = false;
     bool _iconBluetoothLastState = false;
     bool firstLuminosityIcon = true;
+    bool lastLuminosityIconState = false;
 };

@@ -18,7 +18,8 @@ void JUANITO_APP::InitAppPerformances()
     _nbTotalLoops = 0;
 
     // Trace
-    debugln("[PERF] Trace performances started");
+    debugln(F(""));
+    debugln(F("[PERF] Trace performances started"));
 #endif
 }
 

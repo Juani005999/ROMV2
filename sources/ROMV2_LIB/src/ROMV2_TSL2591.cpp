@@ -18,6 +18,9 @@ void ROMV2_TSL2591::Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity)
     _tft = tft;
     _dataLuminosity = dataLuminosity;
 
+    // Création du mutex FreeRTOS
+    _mutex = xSemaphoreCreateMutex();
+
     // Initialisation TSL2591
     if (!_tsl2591.begin()) {
         debugln(F("Could not find a valid TSL2591 sensor, check wiring!"));
@@ -29,7 +32,85 @@ void ROMV2_TSL2591::Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity)
     ConfigureSensor();
 
     // Initialisation des chronos
-    _chronoReadLux = 0;
+    _chronoDisplayLux = 0;
+}
+
+/// <summary>
+/// Démarre la tâche FreeRTOS sur le cœur 1
+/// </summary>
+void ROMV2_TSL2591::StartTask()
+{
+    xTaskCreatePinnedToCore(
+        TaskWrapper,    // Fonction statique wrapper
+        "TSL2591",      // Nom de la tâche
+        4096,           // Stack en bytes (augmenter à 8192 si stack overflow)
+        this,           // Passage du pointeur this pour accéder aux membres
+        1,              // Priorité
+        NULL,           // Handle (non utilisé)
+        1               // Cœur 1 → laisse le cœur 0 libre pour l'UI
+    );
+
+    // Traces
+    debugln(F(""));
+    debugln(F("[LUX] ROMV2_TSL2591 TaskLoop Started"));
+}
+
+/// <summary>
+/// Wrapper statique requis par FreeRTOS — redirige vers TaskLoop()
+/// </summary>
+void ROMV2_TSL2591::TaskWrapper(void* pvParameters)
+{
+    // pvParameters contient le pointeur this passé dans StartTask()
+    static_cast<ROMV2_TSL2591*>(pvParameters)->TaskLoop();
+}
+
+/// <summary>
+/// Boucle de la tâche FreeRTOS — tourne en continu sur le cœur 1
+/// </summary>
+void ROMV2_TSL2591::TaskLoop()
+{
+    while (true)
+    {
+        // Lecture des données brutes du capteur
+        _luminosityIconOn = true;
+        uint32_t lum = _tsl2591.getFullLuminosity();
+        uint16_t ir = lum >> 16;
+        uint16_t full = lum & 0xFFFF;
+        uint16_t visible = full - ir;
+        float    lux = _tsl2591.calculateLux(full, ir);
+
+        // Ecriture des données sous mutex
+        if (xSemaphoreTake(_mutex, pdMS_TO_TICKS(50)) == pdTRUE)
+        {
+            _lastIrRead = ir;
+            _lastFullRead = full;
+            _lastVisibleRead = visible;
+            _lastLuxRead = lux;
+            _newDataReady = true;
+
+            // On libère le mutex
+            xSemaphoreGive(_mutex);
+        }
+
+        // On repositionne l'icone de lecture d'état
+        _luminosityIconOn = false;
+
+        // Traces
+        debugln(F(""));
+        debugln(F("Lecture du TSL2591 dans TaskLoop"));
+        debug(F("[LUX] IR: "));
+        debugln(ir);
+        debug(F("[LUX] Full: "));
+        debugln(full);
+        debug(F("[LUX] Visible: "));
+        debugln(visible);
+        debug(F("[LUX] Lux: "));
+        debugln(lux);
+
+        // Libère le CPU pendant le temps d'intégration
+        // => le cœur 0 est entièrement libre pendant cette attente
+        vTaskDelay(pdMS_TO_TICKS(READ_LUX_INTERVAL));
+    }
 }
 
 /// <summary>
@@ -38,63 +119,82 @@ void ROMV2_TSL2591::Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity)
 void ROMV2_TSL2591::ReadLuminosity()
 {
     // Lecture de luminosité sur intervalle
-    if (millis() > _chronoReadLux + READ_LUX_INTERVAL)
+    if (millis() - _chronoDisplayLux >= DISPLAY_INTERVAL)
     {
-        // On positionne l'icone de lecture d'état
-        _tft->SetLuminosityIcon(true);
+        // Gestion icône — exécuté sur cœur 0, donc TFT safe
+        _tft->SetLuminosityIcon(_luminosityIconOn);
 
-        // Lecture des données du sensor
-        uint32_t lum = _tsl2591.getFullLuminosity();
-        _dataLuminosity->ir = lum >> 16;
-        _dataLuminosity->full = lum & 0xFFFF;
-        _dataLuminosity->visible = _dataLuminosity->full - _dataLuminosity->ir;
-        _dataLuminosity->lux = _tsl2591.calculateLux(_dataLuminosity->full, _dataLuminosity->ir);
-
-        // Si les données lues sont dans les limites
-        if (!isnan(_dataLuminosity->lux) && !isinf(_dataLuminosity->lux)
-            && _dataLuminosity->lux > MIN_LUX_THRESHOLD && _dataLuminosity->full != 0xFFFF && _dataLuminosity->ir != 0xFFFF)
+        // On récupère dans le Thread principal les valeurs lues dans le Thread 1
+        if (xSemaphoreTake(_mutex, pdMS_TO_TICKS(10)) == pdTRUE)
         {
-            // On ajoute à la queue et on récupère la moyenne et la taille
-            _luxAverageQueue.Push(_dataLuminosity->lux);
-            _luxAverageQueue.Average(_dataLuminosity->luxAverage);
-            _dataLuminosity->luxAverageCount = _luxAverageQueue.Size();
+            if (_newDataReady)
+            {
+                // Mise à jour des données sous mutex
+                _localIr = _lastIrRead;
+                _localFull = _lastFullRead;
+                _localVisible = _lastVisibleRead;
+                _localLux = _lastLuxRead;
+                _newDataReady = false;
+                _updatedData = true;
+            }
+
+            // On libère le mutex
+            xSemaphoreGive(_mutex);
         }
 
-        // Update de la valeur de SQM et de Bortle en fonction des valeurs mesurées
-        UpdateSQM();
-        UpdateBortle();
+        if (_updatedData)
+        {
+            // Mise à jour des données globale
+            _dataLuminosity->ir = _localIr;
+            _dataLuminosity->full = _localFull;
+            _dataLuminosity->visible = _localVisible;
+            _dataLuminosity->lux = _localLux;
 
-        // Trace
-        debugln(F(""));
-        debug(F("[LUX] IR: "));
-        debugln(_dataLuminosity->ir);
-        debug(F("[LUX] Full: "));
-        debugln(_dataLuminosity->full);
-        debug(F("[LUX] Visible: "));
-        debugln(_dataLuminosity->visible);
-        debug(F("[LUX] Lux: "));
-        debugln(_dataLuminosity->lux);
-        debug(F("[LUX] Lux Average: "));
-        debugln(_dataLuminosity->luxAverage);
-        debug(F("[LUX] Lux Average Count: "));
-        debugln(_dataLuminosity->luxAverageCount);
-        debug(F("[LUX] SQM: "));
-        debugln(_dataLuminosity->sqm);
-        debug(F("[LUX] Bortle: "));
-        debugln(_dataLuminosity->bortle);
-        debug(F("[LUX] Sensor Gain: "));
-        debugln(_dataLuminosity->luxSensorGain);
-        debug(F("[LUX] Sensor Timing: "));
-        debugln(_dataLuminosity->luxSensorTiming);
+            // Ajout dans la moyenne mobile si valeurs valides
+            if (!isnan(_dataLuminosity->lux) && !isinf(_dataLuminosity->lux)
+                && _dataLuminosity->lux > MIN_LUX_THRESHOLD
+                && _dataLuminosity->full != 0xFFFF && _dataLuminosity->ir != 0xFFFF)
+            {
+                // On ajoute à la queue et on récupère la moyenne et la taille
+                _luxAverageQueue.Push(_dataLuminosity->lux);
+                _luxAverageQueue.Average(_dataLuminosity->luxAverage);
+                _dataLuminosity->luxAverageCount = _luxAverageQueue.Size();
+            }
 
-        // Ajustement des valeurs du sensor si nécessaire
-        CheckSensorValues();
+            // Update de la valeur de SQM et de Bortle en fonction des valeurs mesurées
+            UpdateSQM();
+            UpdateBortle();
 
-        // On positionne l'icone de lecture d'état
-        _tft->SetLuminosityIcon(false);
+            // Trace
+            debugln(F(""));
+            debug(F("[LUX] IR: "));
+            debugln(_dataLuminosity->ir);
+            debug(F("[LUX] Full: "));
+            debugln(_dataLuminosity->full);
+            debug(F("[LUX] Visible: "));
+            debugln(_dataLuminosity->visible);
+            debug(F("[LUX] Lux: "));
+            debugln(_dataLuminosity->lux);
+            debug(F("[LUX] Lux Average: "));
+            debugln(_dataLuminosity->luxAverage);
+            debug(F("[LUX] Lux Average Count: "));
+            debugln(_dataLuminosity->luxAverageCount);
+            debug(F("[LUX] SQM: "));
+            debugln(_dataLuminosity->sqm);
+            debug(F("[LUX] Bortle: "));
+            debugln(_dataLuminosity->bortle);
+            debug(F("[LUX] Sensor Gain: "));
+            debugln(_dataLuminosity->luxSensorGain);
+            debug(F("[LUX] Sensor Timing: "));
+            debugln(_dataLuminosity->luxSensorTiming);
+
+            // Ajustement des valeurs du sensor si nécessaire
+            CheckSensorValues();
+        }
 
         // Actualisation flag et compteurs
-        _chronoReadLux = millis();
+        _updatedData = false;
+        _chronoDisplayLux = millis();
     }
 }
 
@@ -131,36 +231,40 @@ void ROMV2_TSL2591::ConfigureSensor(tsl2591Gain_t gain, tsl2591IntegrationTime_t
     _tsl2591.setGain(_gain);
     _tsl2591.setTiming(_timing);
 
-    // Trace Gain
-    debugln(F(""));
-    debugln(F("[LUX] Sensor TSL2591 : Configure"));
-    debug(F("[LUX] Gain:         "));
+    // Gain
     switch (_gain)
     {
-        case TSL2591_GAIN_LOW:
-            strcpy(_dataLuminosity->luxSensorGain, "1x (Low)");
-            break;
-        case TSL2591_GAIN_MED:
-            strcpy(_dataLuminosity->luxSensorGain, "25x (Medium)");
-            break;
-        case TSL2591_GAIN_HIGH:
-            strcpy(_dataLuminosity->luxSensorGain, "428x (High)");
-            break;
-        case TSL2591_GAIN_MAX:
-            strcpy(_dataLuminosity->luxSensorGain, "9876x (Max)");
-            break;
-        default:
-            strcpy(_dataLuminosity->luxSensorGain, "            ");
-            break;
+    case TSL2591_GAIN_LOW:
+        strcpy(_dataLuminosity->luxSensorGain, "1x (Low)");
+        break;
+    case TSL2591_GAIN_MED:
+        strcpy(_dataLuminosity->luxSensorGain, "25x (Medium)");
+        break;
+    case TSL2591_GAIN_HIGH:
+        strcpy(_dataLuminosity->luxSensorGain, "428x (High)");
+        break;
+    case TSL2591_GAIN_MAX:
+        strcpy(_dataLuminosity->luxSensorGain, "9876x (Max)");
+        break;
+    default:
+        strcpy(_dataLuminosity->luxSensorGain, "            ");
+        break;
     }
     while (strlen(_dataLuminosity->luxSensorGain) < 12)
     {
         strcat(_dataLuminosity->luxSensorGain, " ");
     }
+
+    // Timing
+    sprintf(_dataLuminosity->luxSensorTiming, "%d ms", (int)(_timing + 1) * 100);
+
+    // Trace Gain
+    debugln(F(""));
+    debugln(F("[LUX] Sensor TSL2591 : Configure"));
+    debug(F("[LUX] Gain:         "));
     debugln(_dataLuminosity->luxSensorGain);
 
     // Trace Timing
-    sprintf(_dataLuminosity->luxSensorTiming, "%d ms", (int)(_timing + 1) * 100);
     debug(F("[LUX] Timing:       "));
     debugln(_dataLuminosity->luxSensorTiming);
 }
@@ -170,11 +274,15 @@ void ROMV2_TSL2591::ConfigureSensor(tsl2591Gain_t gain, tsl2591IntegrationTime_t
 /// </summary>
 void ROMV2_TSL2591::CheckSensorValues()
 {
-    if (!isnan(_dataLuminosity->full) && _dataLuminosity->full > TSL2591_SENSOR_VALUE_HIGH)
+    if (!isnan(_dataLuminosity->full)
+        && _dataLuminosity->full > TSL2591_SENSOR_VALUE_HIGH
+        && (_gain != TSL2591_GAIN_LOW || _timing != TSL2591_INTEGRATIONTIME_100MS))
     {
         DecreaseSensor();
     }
-    else if (!isnan(_dataLuminosity->full) && _dataLuminosity->full < TSL2591_SENSOR_VALUE_LOW)
+    else if (!isnan(_dataLuminosity->full)
+        && _dataLuminosity->full < TSL2591_SENSOR_VALUE_LOW
+        && (_gain != TSL2591_GAIN_MAX || _timing != TSL2591_INTEGRATIONTIME_600MS))
     {
         IncreaseSensor();
     }
@@ -337,7 +445,7 @@ void ROMV2_TSL2591::IncreaseTiming()
 /// </summary>
 void ROMV2_TSL2591::UpdateSQM()
 {
-    if (_dataLuminosity->luxAverageCount > 0)
+    if (_dataLuminosity->luxAverageCount > 0 && !isnan(_dataLuminosity->luxAverage))
     {
         // Conversion en magnitude de surface à partir du lux
         LuxToMagConversionResult r = LuxToMagnitude(_dataLuminosity->luxAverage);
@@ -545,4 +653,12 @@ void ROMV2_TSL2591::ClearLuxAverage()
     _dataLuminosity->luxAverageCount = 0;
     _dataLuminosity->sqm = NAN;
     _dataLuminosity->bortle = NAN;
+
+    // Lecture sous mutex des données partagés entre les coeurs
+    if (xSemaphoreTake(_mutex, pdMS_TO_TICKS(50)) == pdTRUE)
+    {
+        _newDataReady = false;
+        _updatedData = false;
+        xSemaphoreGive(_mutex);
+    }
 }

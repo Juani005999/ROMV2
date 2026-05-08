@@ -30,6 +30,11 @@ class ROMV2_TSL2591
     /// </summary>
     void ClearLuxAverage();
 
+    /// <summary>
+    /// Démarre la tâche FreeRTOS de lecture TSL2591 sur le cœur 1
+    /// </summary>
+    void StartTask();
+
   private:
     // Fonctions
     void DisplaySensorDetails();
@@ -47,6 +52,8 @@ class ROMV2_TSL2591
     float GetTimingValue();
     float ComputeSolidAngle_sr(float totalAngle_deg);
     LuxToMagConversionResult LuxToMagnitude(float lux);
+    static void TaskWrapper(void* pvParameters);
+    void TaskLoop();
 
     // Instanciation des objets internes
     Adafruit_TSL2591 _tsl2591 = Adafruit_TSL2591(TSL2591_NUMBER_ID);      // TSL2591 : Capteur de luminosité
@@ -59,7 +66,19 @@ class ROMV2_TSL2591
     tsl2591IntegrationTime_t _timing = TSL2591_INTEGRATIONTIME_600MS;
     bool _lastDecreaseGain = false;
     bool _lastIncreaseGain = false;
+    SemaphoreHandle_t _mutex;
+    bool _newDataReady = false;
+    bool _updatedData = false;
+    float _lastIrRead = NAN;
+    float _lastFullRead = NAN;
+    float _lastVisibleRead = NAN;
+    float _lastLuxRead = NAN;
+    float _localIr = NAN;
+    float _localFull = NAN;
+    float _localVisible = NAN;
+    float _localLux = NAN;
+    volatile bool _luminosityIconOn = false;
 
     // Chronos
-    long _chronoReadLux;                                                  // Chrono pour lecture de la luminosité
+    unsigned long _chronoDisplayLux;                                                  // Chrono pour lecture de la luminosité
 };

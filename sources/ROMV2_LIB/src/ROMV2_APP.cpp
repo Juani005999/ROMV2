@@ -27,6 +27,7 @@ void ROMV2_APP::Init()
 	_adxl345.Init(&_dataAcceleration);
 	_gps.Init(&_dataGPS);
 	_bluetoothLE.Init(&_bluetoothConnected, &_dataEnvironment, &_dataLuminosity, &_dataSkyState);
+	_tsl2591.StartTask();
 
 	// Initialisation Chronos
 	_chronoReadJoystick = 0;
@@ -48,11 +49,8 @@ void ROMV2_APP::Loop()
 	// Lecture température, humidité, pression atm. et point de rosée
 	_bme280.ReadEnvironment();
 
-	// Lecture Luminosité si l'affichage courant est différent de DISPLAY_ACCELERATION
-	if (_currentDisplayScreenType != DISPLAY_ACCELERATION)
-	{
-		_tsl2591.ReadLuminosity();
-	}
+	// Lecture Luminosité
+	_tsl2591.ReadLuminosity();
 
 	// Lecture Température IR
 	_mlx90614.ReadIRTemp();
@@ -111,7 +109,7 @@ void ROMV2_APP::ReadJoystickState()
 		// Pour le bouton Joystick, on traite le clic court sur relachement du bouton
 		else
 		{
-			if (_joystickPressed)
+			if (_joystickPressed && _currentDisplayScreenType != DISPLAY_NONE)
 			{
 				_currentAction = ACTION_CLICK;
 				debugln(F(""));

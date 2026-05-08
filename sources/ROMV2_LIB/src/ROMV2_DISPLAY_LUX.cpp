@@ -100,6 +100,7 @@ void ROMV2_DISPLAY_LUX::DisplayLux()
 
 	// IR / Full
 	char stringBuffer[20];
+	stringBuffer[0] = 0;
 	_tft->setCursor(84, 45);
 	if (!isnan(_dataLuminosity->ir) && _dataLuminosity->ir != 0)
 	{
