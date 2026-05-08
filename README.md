@@ -19,6 +19,7 @@
     - [Optique du TSL2591](#optique-du-tsl2591)
 - [Firmware](#firmware)
     - [Bibliothèques nécessaires à l'application](#bibliothèques-nécessaires-à-lapplication)
+    - [Sélection de la carte](#sélection-de-la-carte)
     - [Paramètres de l'application dans Arduino IDE](#paramètres-de-lapplication-dans-arduino-ide)
     - [Configuration de l'application](#configuration-de-lapplication)
     - [Configuration de l'écran TFT ST7735](#configuration-de-lécran-tft-st7735)
@@ -42,9 +43,10 @@
     - [Utilisation dans NINA](#utilisation-dans-nina)
         - [Sélection du ROM V2 dans NINA](#sélection-du-rom-v2-dans-nina)
         - [Première utilisation dans NINA](#première-utilisation-dans-nina)
+- [Révisions](#révisions)
 
 ## Description
-Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
+Le ROMV2 est un Sky Quality Meter (SQM) DIY (Do It Yourself) contenant les composants suivant :
 - TSL2591
 - MLX90614
 - BME280
@@ -57,7 +59,9 @@ Le ROMV2 est un Sky Quality Meter (SQM) contenant les composants suivant :
 ### Fonctionnalités
 
 - Lecture de la luminosité (full / ir / visible), calcul de la quantité de lux, du SQM et du Bortle.
-- Moyenne mobile du lux sur 50 valeurs permettant de réduire l'incertitude mesurée. Calcul du SQM et du Bortle sur la moyenne mobile du lux. Possibilité de remise à zéro de la moyenne mobile.
+- Lecture de la luminosité dans une tâche dédiée FreeRTOS s'exécutant en paralèlle sur le 2ème coeur de l'ESP 32.
+- Moyenne mobile du lux sur 50 valeurs permettant de réduire l'incertitude mesurée. Calcul du SQM et du Bortle sur la moyenne mobile du lux.
+- Possibilité de remise à zéro de la moyenne mobile.
 - Réglage automatique de la sensibilité (1x, 25x, 428x, 9876x) et de la durée de mesure (100ms, 200ms, 300ms, 400ms, 500ms, 600ms) du capteur de luminosité TSL2591.
 - Lecture de la qualité du ciel (3 états : ciel clair / peu nuageux / nuageux) via le capteur MLX90614 permettant la lecture de la température du ciel.
 - Lecture des conditions d'environnement (Température, taux d'humidité, pression atmosphérique) via le capteur BME280.
@@ -130,9 +134,9 @@ Voici l'échelle de Bortle utilisée dans l'application.
 | --- | --- | --- |
 | Vis & rondelles | M4 x 20mm | 8 |
 | Vis & rondelles | M2 x 20mm | 4 |
-| Vis & rondelles | M2 x 8mm | 17 |
+| Vis & rondelles | M2 x 8mm | 21 |
 | Vis & rondelles | M2 x 6mm | 8 |
-| Ecrou Nylstop autobloquants | M2 | 3 |
+| Ecrou Nylstop autobloquants | M2 | 7 |
 | Condensateur | 100 µF | 1 |
 | Condensateur céramique | 100 nF | 1 |
 | [PCB EPLZON](https://www.amazon.fr/dp/B0B5DCHM7K) | ... | 1 |
@@ -208,7 +212,7 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Bibliothèques nécessaires à l'application
-Voici la liste des bibliothèques utilisées par l'application que vous devez installer via le gestionnaire de librairies dans votre Arduino IDE :
+Voici la liste des bibliothèques utilisées par l'application que vous devez installer via le gestionnaire de librairies dans votre *Arduino IDE* :
 
 - Adafruit_TSL2591
 - Adafruit_BME280
@@ -217,6 +221,10 @@ Voici la liste des bibliothèques utilisées par l'application que vous devez in
 - TFT_eSPI
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Sélection de la carte
+Dans votre *Arduino IDE*, sélectionnez la carte **ESP32 Dev Module**.
+![ESP32 Dev Module](screenshots/ESP32_Dev_Module.png)
 
 ### Paramètres de l'application dans Arduino IDE
 
@@ -282,7 +290,7 @@ En activant le mode **Debug**, vous pourrez voir les traces de l'application dan
 
 Vous trouverez au bas du ROM V2 :
 - l'interrupteur On/Off de l'appareil.
-- 1 connecteur Micro USB permettant de recharger le ROM V2 et servant également à la mise à jour du firmware.
+- 1 connecteur **Micro USB** permettant de recharger le ROM V2 et servant également à la mise à jour du firmware.
 - 1 interrupteur (bouton poussoir) permettant de mettre l'ESP en mode Boot lors de la mise à jour du firmware.
 - L'indicateur de charge restante dans la batterie. Appuyez sur le bouton **"TEST"** de l'indicateur pour connaître la charge restante.
 
@@ -330,10 +338,6 @@ L'en-tête comprend les éléments suivants :
 - Un icone indiquant qu'une prise de mesure de la luminosité est en cours.
 - Un icone indiquant la présence d'une connexion client via Blutooth (2 états : rouge et vert).
 - Un icone indiquant si le GPS est "fixé", remontant ainsi les informations de localisation (2 états : rouge et vert). Est également précisé le nombre de satellites à partir desquels le capteur récupère les informations. 
-
-> [!WARNING]
-> Pendant la prise de mesure de luminosité, le firmware est en attente du capteur, et ne prend aucune autre commande.\
-> Donc lorsque l'icone de prise de mesure de luminosité est allumé, il se peut que les commandes envoyées via le joystick ne soient pas correctement prise en compte.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -505,3 +509,10 @@ Enjoy
 ![NINA démo](screenshots/NINA%20demo.png)
 
 <p align="right"><b><i>Juanito del Pepito</i></b></p>
+
+## Révisions
+
+| Date | Version | Commentaires |
+| --- | --- | --- |
+| 08/05/2026 | 2.0.1.1 | Lecture de la luminosité dans une tâche dédiée FreeRTOS s'exécutant en paralèlle sur le 2ème coeur de l'ESP 32 |
+| | | |
