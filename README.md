@@ -43,6 +43,7 @@
     - [Utilisation dans NINA](#utilisation-dans-nina)
         - [Sélection du ROM V2 dans NINA](#sélection-du-rom-v2-dans-nina)
         - [Première utilisation dans NINA](#première-utilisation-dans-nina)
+- [Retex](#retex)
 - [Révisions](#révisions)
 
 ## Description
@@ -178,7 +179,7 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 ![ESP32](screenshots/ESP32.jpg)
 
 > [!WARNING]
-> Attention, le connecteur **micro USB** présent sur l'ESP est **très très fragile** (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de part et d'autre du connecteur  afin d'augementer sa solidité.
+> Attention, le connecteur **micro USB** présent sur l'ESP est **très très fragile** (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de part et d'autre du connecteur  afin d'augmenter sa solidité.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -509,6 +510,12 @@ Enjoy
 ![NINA démo](screenshots/NINA%20demo.png)
 
 <p align="right"><b><i>Juanito del Pepito</i></b></p>
+
+## Retex
+
+Voici un petit retour d'expérience des mesures de l'état de mon ciel à mon domicile :
+
+![NINA démo](screenshots/observations_retex.png)
 
 ## Révisions
 
