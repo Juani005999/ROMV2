@@ -92,7 +92,7 @@ Voici l'échelle de Bortle utilisée dans l'application.
 
 | Composant | Prix | Nb. pièces | Prix unitaire |
 | --- | --- | --- | --- |
-| [ESP32 with Battery](https://www.amazon.fr/dp/B07YXFBFWF) | 18.77 € | 1 | 18.77 € |
+| [ESP32 with Battery (Micro USB)](https://www.amazon.fr/dp/B07YXFBFWF) | 18.77 € | 1 | 18.77 € |
 | [TSL2591](https://www.amazon.fr/dp/B0GGD3FNKM) | 15.10 € | 1 | 15.10 € |
 | [BME280](https://www.amazon.fr/dp/B07HMQMW6M) | 30.99 € | 5 | 6.20 € |
 | [ADXL345](https://www.amazon.fr/ADXL345-Acc%C3%A9l%C3%A9rom%C3%A8tres-Acc%C3%A9l%C3%A9rom%C3%A8tre-Num%C3%A9rique-Transmission/dp/B0CMHXKVFK) | 10.56 € | 5 | 2.12 € |
@@ -112,7 +112,7 @@ Voici l'échelle de Bortle utilisée dans l'application.
 ### Ali Express
 | Composant | Prix | Nb. pièces | Prix unitaire |
 | --- | --- | --- | --- |
-| [ESP32 with Battery](https://fr.aliexpress.com/item/1005007579177706.html) | 4.19 € | 1 | 4.19 € |
+| [ESP32 with Battery (Micro USB)](https://fr.aliexpress.com/item/1005007579177706.html) | 4.19 € | 1 | 4.19 € |
 | [TSL2591](https://fr.aliexpress.com/item/1005009222536594.html) | 4.19 € | 1 | 4.19 € |
 | [BME280](https://fr.aliexpress.com/item/1005010256393146.html) | 2.99 € | 1 | 2.99 € |
 | [ADXL345](https://fr.aliexpress.com/item/1005007076396937.html) | 2.04 € | 1 | 2.04 € |
