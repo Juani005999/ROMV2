@@ -55,6 +55,8 @@ Le ROMV2 est un Sky Quality Meter (SQM) DIY (Do It Yourself) contenant les compo
 - GPS NEO 8M
 - TFT ST7735
 
+Ce modèle est la version complète du [SQMLite](https://github.com/Juani005999/SQMLite), avec le GPS, l'accéléromètre et la lecture de la température du ciel.
+
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Fonctionnalités
