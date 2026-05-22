@@ -22,7 +22,7 @@ void ROMV2_APP::Init()
 	// Initialisation des objets représentant les capteurs et périphériques
 	_tft.Init(&_dataEnvironment, &_dataLuminosity, &_dataSkyState, &_dataAcceleration, &_dataGPS, &_bluetoothConnected);
 	_bme280.Init(&_dataEnvironment);
-	_tsl2591.Init(&_tft, &_dataLuminosity);
+	_tsl2591.Init(&_tft, &_dataLuminosity, &_dataEnvironment);
 	_mlx90614.Init(&_dataSkyState);
 	_adxl345.Init(&_dataAcceleration);
 	_gps.Init(&_dataGPS);

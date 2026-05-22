@@ -12,11 +12,13 @@ ROMV2_TSL2591::ROMV2_TSL2591()
 /// </summary>
 /// <param name="tft"></param>
 /// <param name="dataLuminosity"></param>
-void ROMV2_TSL2591::Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity)
+/// <param name="dataEnvironment"></param>
+void ROMV2_TSL2591::Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity, DataSensorEnvironment* dataEnvironment)
 {
     // Valorisation des membres internes
     _tft = tft;
     _dataLuminosity = dataLuminosity;
+    _dataEnvironment = dataEnvironment;
 
     // Création du mutex FreeRTOS
     _mutex = xSemaphoreCreateMutex();
@@ -150,13 +152,16 @@ void ROMV2_TSL2591::ReadLuminosity()
             _dataLuminosity->visible = _localVisible;
             _dataLuminosity->lux = _localLux;
 
+            // Correction thermique du lux mesuré
+            _dataLuminosity->luxThermalCorrected = CorrectThermal(_dataLuminosity->lux);
+
             // Ajout dans la moyenne mobile si valeurs valides
-            if (!isnan(_dataLuminosity->lux) && !isinf(_dataLuminosity->lux)
-                && _dataLuminosity->lux > MIN_LUX_THRESHOLD
+            if (!isnan(_dataLuminosity->luxThermalCorrected) && !isinf(_dataLuminosity->luxThermalCorrected)
+                && _dataLuminosity->luxThermalCorrected > MIN_LUX_THRESHOLD
                 && _dataLuminosity->full != 0xFFFF && _dataLuminosity->ir != 0xFFFF)
             {
                 // On ajoute à la queue et on récupère la moyenne et la taille
-                _luxAverageQueue.Push(_dataLuminosity->lux);
+                _luxAverageQueue.Push(_dataLuminosity->luxThermalCorrected);
                 _luxAverageQueue.Average(_dataLuminosity->luxAverage);
                 _dataLuminosity->luxAverageCount = _luxAverageQueue.Size();
             }
@@ -175,6 +180,8 @@ void ROMV2_TSL2591::ReadLuminosity()
             debugln(_dataLuminosity->visible);
             debug(F("[LUX] Lux: "));
             debugln(_dataLuminosity->lux);
+            debug(F("[LUX] Lux Thermal Corrected: "));
+            debugln(_dataLuminosity->luxThermalCorrected);
             debug(F("[LUX] Lux Average: "));
             debugln(_dataLuminosity->luxAverage);
             debug(F("[LUX] Lux Average Count: "));
@@ -661,4 +668,34 @@ void ROMV2_TSL2591::ClearLuxAverage()
         _updatedData = false;
         xSemaphoreGive(_mutex);
     }
+}
+
+/// <summary>
+/// Applique la correction de dérive thermique sur la valeur lux
+/// Correction linéaire : lux_corrigé = lux_brut × (1 + TEMP_COEFF × (T - TEMP_REF_C))
+/// </summary>
+/// <param name="lux">Lux brut mesuré</param>
+/// <returns>Lux corrigé</returns>
+float ROMV2_TSL2591::CorrectThermal(float lux)
+{
+    // Vérification que la température est disponible
+    if (isnan(_dataEnvironment->temperature))
+    {
+        return lux;
+    }
+
+    // Calcul du facteur de correction
+    float correction = 1.0f + TSL2591_CORRECTION_TEMP_COEFF * (_dataEnvironment->temperature - TSL2591_CORRECTION_TEMP_REF_C);
+
+    // Clamp : ne pas laisser la correction devenir négative ou absurde
+    correction = constrain(correction, 0.5f, 2.0f);
+
+    // Trace
+    debugln(F(""));
+    debug(F("[LUX] Temp BME280: "));
+    debugln(_dataEnvironment->temperature);
+    debug(F("[LUX] Temp correction factor: "));
+    debugln(correction);
+
+    return lux * correction;
 }

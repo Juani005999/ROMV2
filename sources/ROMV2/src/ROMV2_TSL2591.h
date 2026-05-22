@@ -18,7 +18,8 @@ class ROMV2_TSL2591
     /// </summary>
     /// <param name="tft"></param>
     /// <param name="dataLuminosity"></param>
-    void Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity);
+    /// <param name="dataEnvironment"></param>
+    void Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity, DataSensorEnvironment* dataEnvironment);
 
     /// <summary>
     /// Lecture de la luminosité
@@ -54,6 +55,7 @@ class ROMV2_TSL2591
     LuxToMagConversionResult LuxToMagnitude(float lux);
     static void TaskWrapper(void* pvParameters);
     void TaskLoop();
+    float CorrectThermal(float lux);
 
     // Instanciation des objets internes
     Adafruit_TSL2591 _tsl2591 = Adafruit_TSL2591(TSL2591_NUMBER_ID);      // TSL2591 : Capteur de luminosité
@@ -61,6 +63,7 @@ class ROMV2_TSL2591
 
     // Membres internes
     DataSensorLuminosity* _dataLuminosity;
+    DataSensorEnvironment* _dataEnvironment;
     JUANITO_MOVING_AVERAGE<float, TSL2591_MOVING_AVERAGE_COUNT> _luxAverageQueue;
     tsl2591Gain_t _gain = TSL2591_GAIN_MED;
     tsl2591IntegrationTime_t _timing = TSL2591_INTEGRATIONTIME_600MS;

@@ -63,6 +63,7 @@ Ce modèle est la version complète du [SQMLite](https://github.com/Juani005999/
 
 - Lecture de la luminosité (full / ir / visible), calcul de la quantité de lux, du SQM et du Bortle.
 - Lecture de la luminosité dans une tâche dédiée FreeRTOS s'exécutant en paralèlle sur le 2ème coeur de l'ESP 32.
+- Correction thermique de la lecture de la luminosité avec la température ambiante.
 - Moyenne mobile du lux sur 50 valeurs permettant de réduire l'incertitude mesurée. Calcul du SQM et du Bortle sur la moyenne mobile du lux.
 - Possibilité de remise à zéro de la moyenne mobile.
 - Réglage automatique de la sensibilité (1x, 25x, 428x, 9876x) et de la durée de mesure (100ms, 200ms, 300ms, 400ms, 500ms, 600ms) du capteur de luminosité TSL2591.
@@ -525,6 +526,7 @@ Voici un petit retour d'expérience des mesures de l'état de mon ciel à mon do
 
 | Date | Version | Commentaires |
 | --- | --- | --- |
+| 23/05/2026 | 2.0.2.1 | Correction thermique du Lux |
 | 17/05/2026 | 2.0.1.1 | Simplification du train optique du TSL2591 |
 | 08/05/2026 | 2.0.1.1 | Lecture de la luminosité dans une tâche dédiée FreeRTOS s'exécutant en paralèlle sur le 2ème coeur de l'ESP 32 |
 

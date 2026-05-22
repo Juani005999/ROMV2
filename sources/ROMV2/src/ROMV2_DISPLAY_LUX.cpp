@@ -140,29 +140,29 @@ void ROMV2_DISPLAY_LUX::DisplayLux()
 	}
 	_tft->print(stringBuffer);
 
-	// Lux
+	// lux Thermal Corrected
 	_tft->setCursor(84, 65);
-	if (!isnan(_dataLuminosity->lux))
+	if (!isnan(_dataLuminosity->luxThermalCorrected))
 	{
-		if (_dataLuminosity->lux >= 10000)
+		if (_dataLuminosity->luxThermalCorrected >= 10000)
 		{
-			sprintf(stringBuffer, "%.1f", _dataLuminosity->lux);
+			sprintf(stringBuffer, "%.1f", _dataLuminosity->luxThermalCorrected);
 		}
-		else if (_dataLuminosity->lux >= 1000)
+		else if (_dataLuminosity->luxThermalCorrected >= 1000)
 		{
-			sprintf(stringBuffer, "%.2f", _dataLuminosity->lux);
+			sprintf(stringBuffer, "%.2f", _dataLuminosity->luxThermalCorrected);
 		}
-		else if (_dataLuminosity->lux >= 100)
+		else if (_dataLuminosity->luxThermalCorrected >= 100)
 		{
-			sprintf(stringBuffer, "%.3f", _dataLuminosity->lux);
+			sprintf(stringBuffer, "%.3f", _dataLuminosity->luxThermalCorrected);
 		}
-		else if (_dataLuminosity->lux >= 10)
+		else if (_dataLuminosity->luxThermalCorrected >= 10)
 		{
-			sprintf(stringBuffer, "%.4f", _dataLuminosity->lux);
+			sprintf(stringBuffer, "%.4f", _dataLuminosity->luxThermalCorrected);
 		}
-		else if (_dataLuminosity->lux >= 0)
+		else if (_dataLuminosity->luxThermalCorrected >= 0)
 		{
-			sprintf(stringBuffer, "%.5f", _dataLuminosity->lux);
+			sprintf(stringBuffer, "%.5f", _dataLuminosity->luxThermalCorrected);
 		}
 		else
 		{

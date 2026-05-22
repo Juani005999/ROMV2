@@ -2,9 +2,9 @@
 ///
 /// Projet                          : ROMV2 - Remote Open Météo Version 2 - Sky Quality Meter DIY
 /// Auteur                          : Juanito del Pepito
-/// Version                         : 2.0.1.1
+/// Version                         : 2.0.2.1
 /// Date                            : 10/04/2026
-/// Date Révision                   : 08/05/2026
+/// Date Révision                   : 23/05/2026
 /// 
 /// Description                     : Sky Quality Meter (SQM) - Fichier de configuration de l'application
 /// Gitub                           : https://github.com/Juani005999/ROMV2
@@ -87,6 +87,8 @@
 #define TSL2591_CALIBRATION						0						// Valeur servant à la calibration du TSL2591 : le calcul donne 1.121, la pratique donne 0
 #define MIN_LUX_THRESHOLD						0.00005f				// Seuil minimum de lux valide (en dessous = bruit capteur)
 #define TSL2591_MOVING_AVERAGE_COUNT			50						// Nombre de valeurs pour le calcul de la moyenne mobile du Lux
+#define TSL2591_CORRECTION_TEMP_COEFF			-0.002f					// Coefficient thermique /°C
+#define TSL2591_CORRECTION_TEMP_REF_C			25.0f					// Température de référence (°C)
 
 // Définition des constantes pour la calibration de l'état du ciel
 #define SKY_STATE_POINT_LOW						5						// Calibration basse pour l'état du ciel
@@ -187,6 +189,7 @@ struct DataSensorLuminosity {
 	float visible = NAN;												// Mesure de la luminosité dans le visible
 	float lux = NAN;													// Mesure de la quantité de Lux
 	float luxAverage = NAN;												// Moyenne mobile du Lux sur TSL2591_MOVING_AVERAGE_COUNT valeurs
+	float luxThermalCorrected = NAN;									// Lux après correction thermique
 	int luxAverageCount = 0;											// Nombre de valeurs dans la queue pour le calcul de la moyenne mobile du Lux
 	double sqm = NAN;													// Valeure calculée du SQM (Mag/Arcsec²)
 	float bortle = NAN;													// Valeure du Bortle
