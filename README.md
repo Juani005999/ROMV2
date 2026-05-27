@@ -547,8 +547,9 @@ Voici un petit retour d'expérience des mesures de l'état de mon ciel à mon do
 | Date | Version | Commentaires |
 | --- | --- | --- |
 | 27/05/2026 | 2.0.3.1 | <ul><li>Ajout d'un nouvel écran permettant la calibration du capteur de luminosité TSL2591.</li><li>Sauvegarde et lecture de la calibration en EEPROM permettant de stocker cette valeur même après extinction de l'appareil.</ul> |
-| 23/05/2026 | 2.0.2.1 | Correction thermique de la lecture de la luminosité avec la température ambiante |
-| 17/05/2026 | 2.0.1.1 | Simplification du train optique du TSL2591 |
-| 08/05/2026 | 2.0.1.1 | Lecture de la luminosité dans une tâche dédiée FreeRTOS s'exécutant en paralèlle sur le 2ème coeur de l'ESP 32 |
+| 23/05/2026 | 2.0.2.1 | Correction thermique de la lecture de la luminosité avec la température ambiante. |
+| 17/05/2026 | 2.0.1.2 | Simplification du train optique du TSL2591. |
+| 08/05/2026 | 2.0.1.1 | Lecture de la luminosité dans une tâche dédiée FreeRTOS s'exécutant en paralèlle sur le 2ème coeur de l'ESP 32. |
+| 30/04/2026 | 2.0.0.1 | Version initiale. |
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
