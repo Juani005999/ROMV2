@@ -42,6 +42,10 @@ void ROMV2_TSL2591::Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity, D
 /// </summary>
 void ROMV2_TSL2591::StartTask()
 {
+    // Trace
+    debugln(F(""));
+    debugln(F("[LUX] Starting ROMV2_TSL2591 TaskLoop"));
+
     xTaskCreatePinnedToCore(
         TaskWrapper,    // Fonction statique wrapper
         "TSL2591",      // Nom de la tâche
@@ -52,8 +56,7 @@ void ROMV2_TSL2591::StartTask()
         1               // Cœur 1 → laisse le cœur 0 libre pour l'UI
     );
 
-    // Traces
-    debugln(F(""));
+    // Trace
     debugln(F("[LUX] ROMV2_TSL2591 TaskLoop Started"));
 }
 
@@ -99,7 +102,7 @@ void ROMV2_TSL2591::TaskLoop()
 
         // Traces
         debugln(F(""));
-        debugln(F("Lecture du TSL2591 dans TaskLoop"));
+        debugln(F("[LUX] Lecture du TSL2591 dans TaskLoop"));
         debug(F("[LUX] IR: "));
         debugln(ir);
         debug(F("[LUX] Full: "));
@@ -455,7 +458,7 @@ void ROMV2_TSL2591::UpdateSQM()
     if (_dataLuminosity->luxAverageCount > 0 && !isnan(_dataLuminosity->luxAverage))
     {
         // Conversion en magnitude de surface à partir du lux
-        LuxToMagConversionResult r = LuxToMagnitude(_dataLuminosity->luxAverage);
+        LuxToMagConversionResult r = LuxToMagnitude(_dataLuminosity->luxAverage, _dataLuminosity->tsl2591Calibration);
         if (r.valid)
         {
             _dataLuminosity->sqm = r.magnitude_arcsec2;
@@ -624,14 +627,18 @@ float ROMV2_TSL2591::ComputeSolidAngle_sr(float totalAngle_deg)
 /// <summary>
 /// Conversion de Lux vers Mag/Arcsec²
 /// </summary>
-/// <param name="lux">Valeur mesurée en Lux</param>
-/// <param name="ch0">Valeur de luminosité dans l'IR</param>
-/// <param name="raw_ch1">Valeur de luminosité totale</param>
+/// <param name="lux"></param>
+/// <param name="tsl2591Calibration"></param>
 /// <returns></returns>
-LuxToMagConversionResult ROMV2_TSL2591::LuxToMagnitude(float lux)
+LuxToMagConversionResult ROMV2_TSL2591::LuxToMagnitude(float lux, int tsl2591Calibration)
 {
     LuxToMagConversionResult result;
     result.lux = lux;
+
+    if (isnan(tsl2591Calibration))
+    {
+        tsl2591Calibration = 0;
+    }
 
     // Sécurité : saturation capteur ou valeur nulle
     if (isnan(lux) || isinf(lux) || lux <= MIN_LUX_THRESHOLD) {
@@ -642,11 +649,12 @@ LuxToMagConversionResult ROMV2_TSL2591::LuxToMagnitude(float lux)
 
     // Calcul de la magnitude à partir du lux
     result.valid = true;
-    result.magnitude_arcsec2 = -2.5 * log10(lux / 108000.0) + TSL2591_CALIBRATION;
+    result.magnitude_arcsec2 = -2.5 * log10(lux / 108000.0) + (tsl2591Calibration / 100.0f);
     if (result.magnitude_arcsec2 < 0)
     {
         result.magnitude_arcsec2 = 0;
     }
+
     return result;
 }
 
@@ -698,4 +706,43 @@ float ROMV2_TSL2591::CorrectThermal(float lux)
     debugln(correction);
 
     return lux * correction;
+}
+
+/// <summary>
+/// Sauvegarde de la calibration du TSL2591
+/// </summary>
+/// <param name="value"></param>
+void ROMV2_TSL2591::SaveTSL2591Calibration(int value)
+{
+    // Trace
+    debugln(F(""));
+    debug(F("[LUX] Début sauvegarde nouvelle calibration : "));
+    debugln(value);
+
+    _preferences.begin("config", false);
+    _preferences.putInt("tsl_calib", value);
+    _preferences.end();
+    _dataLuminosity->tsl2591Calibration = value;
+
+    // Trace
+    debugln(F("[LUX] Fin sauvegarde nouvelle calibration"));
+}
+
+/// <summary>
+/// Chargement de la calibration du TSL2591
+/// </summary>
+/// <returns></returns>
+void ROMV2_TSL2591::LoadTSL2591Calibration()
+{
+    // Trace
+    debugln(F(""));
+    debugln(F("[LUX] Début lecture calibration"));
+
+    _preferences.begin("config", true);
+    _dataLuminosity->tsl2591Calibration = _preferences.getInt("tsl_calib", 0);
+    _preferences.end();
+
+    // Trace
+    debug(F("[LUX] Fin lecture calibration : "));
+    debugln(_dataLuminosity->tsl2591Calibration);
 }

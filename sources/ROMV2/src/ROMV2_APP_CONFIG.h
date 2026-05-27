@@ -2,9 +2,9 @@
 ///
 /// Projet                          : ROMV2 - Remote Open Météo Version 2 - Sky Quality Meter DIY
 /// Auteur                          : Juanito del Pepito
-/// Version                         : 2.0.2.1
+/// Version                         : 2.0.3.1
 /// Date                            : 10/04/2026
-/// Date Révision                   : 23/05/2026
+/// Date Révision                   : 27/05/2026
 /// 
 /// Description                     : Sky Quality Meter (SQM) - Fichier de configuration de l'application
 /// Gitub                           : https://github.com/Juani005999/ROMV2
@@ -41,6 +41,7 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+#include <Preferences.h>
 
 // Définition des constantes correspondant aux PIN
 #define ESP32_GPIO_SDA                          21                      // GPIO I2C SDA
@@ -59,13 +60,14 @@
 
 // Définition des constantes correspondant aux intervalles
 #define READ_ENVIRONMENT_INTERVAL               3000                    // Intervalle de lecture de l'environnement via BME280
-#define READ_LUX_INTERVAL                       5000					// Intervalle de lecture de la luminosité via TSL2591
+#define READ_LUX_INTERVAL                       2000					// Intervalle de lecture de la luminosité via TSL2591
 #define READ_IRTEMP_INTERVAL                    2000                    // Intervalle de lecture de la température IR via MLX90614
 #define READ_ACCEL_INTERVAL                     120						// Intervalle de lecture de l'accélération via ADXL345
 #define READ_GPS_STATE_INTERVAL					5000					// Intervalle de lecture de l'état du GPS
 #define BLE_NOTIFY_INTERVAL						1000					// Intervalle de Notification des caractéristiques BLE (Bluetooth Low Energy)
 #define DISPLAY_INTERVAL                        120                     // Intervalle d'affichage sur l'écran
 #define JOYSTICK_BUTTON_LONG_INTERVAL           1000					// Intervalle du clic long sur le Joystick
+#define JOYSTICK_MOVE_LONG_INTERVAL				500						// Intervalle du mouvement long sur le Joystick
 #define JOYSTICK_READ_INTERVAL					50						// Intervalle de lecture de l'état du Joystick
 
 // Définition des constantes de taille pour les chaînes de caractères
@@ -84,11 +86,12 @@
 // Définition des constantes pour la calibration de la lecture du TSL2591
 #define TSL2591_SENSOR_VALUE_LOW				750						// Niveau bas du sensor => augmentation de la sensibilité du sensor si valeur en dessous
 #define TSL2591_SENSOR_VALUE_HIGH				20000					// Niveau haut du sensor => diminution de la sensibilité du sensor si valeur au dessus
-#define TSL2591_CALIBRATION						0						// Valeur servant à la calibration du TSL2591 : le calcul donne 1.121, la pratique donne 0
 #define MIN_LUX_THRESHOLD						0.00005f				// Seuil minimum de lux valide (en dessous = bruit capteur)
 #define TSL2591_MOVING_AVERAGE_COUNT			50						// Nombre de valeurs pour le calcul de la moyenne mobile du Lux
 #define TSL2591_CORRECTION_TEMP_COEFF			-0.002f					// Coefficient thermique /°C
 #define TSL2591_CORRECTION_TEMP_REF_C			25.0f					// Température de référence (°C)
+#define TSL2591_CALIBRATION_MIN_VALUE			-200					// Valeur minimale pour la calibration du TSL2591
+#define TSL2591_CALIBRATION_MAX_VALUE			200						// Valeur maximale pour la calibration du TSL2591
 
 // Définition des constantes pour la calibration de l'état du ciel
 #define SKY_STATE_POINT_LOW						5						// Calibration basse pour l'état du ciel
@@ -126,7 +129,8 @@ enum DISPLAY_SCREEN_TYPE
 	DISPLAY_ENVIRONMENT,
 	DISPLAY_IRTEMP,
 	DISPLAY_ACCELERATION,
-	DISPLAY_GPS
+	DISPLAY_GPS,
+	DISPLAY_TSL2591_CALIBRATION
 };
 
 // Définition des différents mode d'affichage de l'écran Home
@@ -168,57 +172,58 @@ enum SKY_STATE
 
 // Structure des données nécessaires pour la gestion du capteur d'environnement BME280
 struct DataSensorEnvironment {
-	float temperature = NAN;											// Température (°C)
-	float humidite = NAN;												// Taux d'humidité	(%)
-	float pression = NAN;												// Pression atmosphérique (Pa)
-	float dewPoint = NAN;												// Point de rosée (°C)
-	DEWPOINT_STATE dewPointState = DEWPOINT_STATE_UNKNOWN;				// Etat du point de rosée pour l'icone
+	float			temperature = NAN;									// Température (°C)
+	float			humidite = NAN;										// Taux d'humidité	(%)
+	float			pression = NAN;										// Pression atmosphérique (Pa)
+	float			dewPoint = NAN;										// Point de rosée (°C)
+	DEWPOINT_STATE	dewPointState = DEWPOINT_STATE_UNKNOWN;				// Etat du point de rosée pour l'icone
 };
 
 // Structure de résultat pour la conversion de Lux vers Mag/Arcsec²
 struct LuxToMagConversionResult {
-	float lux;															// Lux mesuré par le TSL2591
-	double magnitude_arcsec2;											// Résultat final (mag/arcsec²)
-	bool valid;
+	float	lux;														// Lux mesuré par le TSL2591
+	double	magnitude_arcsec2;											// Résultat final (mag/arcsec²)
+	bool	valid;
 };
 
 // Structure des données nécessaires pour la gestion du capteur de luminosité TSL2591
 struct DataSensorLuminosity {
-	float ir = NAN;														// Mesure de la luminosité dans l'IR
-	float full = NAN;													// Mesure de la luminosité totale
-	float visible = NAN;												// Mesure de la luminosité dans le visible
-	float lux = NAN;													// Mesure de la quantité de Lux
-	float luxAverage = NAN;												// Moyenne mobile du Lux sur TSL2591_MOVING_AVERAGE_COUNT valeurs
-	float luxThermalCorrected = NAN;									// Lux après correction thermique
-	int luxAverageCount = 0;											// Nombre de valeurs dans la queue pour le calcul de la moyenne mobile du Lux
-	double sqm = NAN;													// Valeure calculée du SQM (Mag/Arcsec²)
-	float bortle = NAN;													// Valeure du Bortle
-	char  luxSensorGain[20];											// Gain du sensor
-	char  luxSensorTiming[20];											// Temps d'exposition du sensor
+	float	ir = NAN;													// Mesure de la luminosité dans l'IR
+	float	full = NAN;													// Mesure de la luminosité totale
+	float	visible = NAN;												// Mesure de la luminosité dans le visible
+	float	lux = NAN;													// Mesure de la quantité de Lux
+	float	luxAverage = NAN;											// Moyenne mobile du Lux sur TSL2591_MOVING_AVERAGE_COUNT valeurs
+	float	luxThermalCorrected = NAN;									// Lux après correction thermique
+	int		luxAverageCount = 0;										// Nombre de valeurs dans la queue pour le calcul de la moyenne mobile du Lux
+	double	sqm = NAN;													// Valeure calculée du SQM (Mag/Arcsec²)
+	float	bortle = NAN;												// Valeure du Bortle
+	char	luxSensorGain[20];											// Gain du sensor
+	char	luxSensorTiming[20];										// Temps d'exposition du sensor
+	int		tsl2591Calibration = 0;										// Calibration du TSL2591. Cette valeur est divisée par 100 dans le calcul. On part sur des int afin d'éviter des problèmes de précision des nombres flotants
 };
 
 // Structure des données nécessaires pour la gestion du capteur d'état du ciel MLX90614
 struct DataSensorSkyState {
-	float tempAmbient = NAN;											// Température ambiante
-	float tempObject = NAN;												// Température de l'objet
-	SKY_STATE skyState = SKY_STATE_UNKNOWN;								// Etat du ciel
-	float cloudCover = NAN;												// Couverture nuageuse (%)
+	float		tempAmbient = NAN;										// Température ambiante
+	float		tempObject = NAN;										// Température de l'objet
+	SKY_STATE	skyState = SKY_STATE_UNKNOWN;							// Etat du ciel
+	float		cloudCover = NAN;										// Couverture nuageuse (%)
 };
 
 // Structure des données nécessaires pour la gestion du capteur d'accélération ADXL345
 struct DataSensorAcceleration {
-	float x = NAN;														// Accélération en X
-	float y = NAN;														// Accélération en Y
-	float z = NAN;														// Accélération en Z
+	float	x = NAN;													// Accélération en X
+	float	y = NAN;													// Accélération en Y
+	float	z = NAN;													// Accélération en Z
 };
 
 // Structure des données nécessaires pour la gestion du capteur GPS NEO 8M
 struct DataSensorGPS {
-	char  gpsDate[20];													// Date
-	char  gpsTime[20];													// Heure
-	char  gpsLatitude[20];												// Latitude
-	char  gpsLongitude[20];												// Longitude
-	char  gpsAltitude[20];												// Altitude
-	char  gpsSatellites[20];											// Nombre de satellites
-	bool  gpsFix = false;												// GPS fixé
+	char	gpsDate[20];												// Date
+	char	gpsTime[20];												// Heure
+	char	gpsLatitude[20];											// Latitude
+	char	gpsLongitude[20];											// Longitude
+	char	gpsAltitude[20];											// Altitude
+	char	gpsSatellites[20];											// Nombre de satellites
+	bool	gpsFix = false;												// GPS fixé
 };

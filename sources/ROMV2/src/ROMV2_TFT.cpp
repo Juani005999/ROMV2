@@ -44,6 +44,7 @@ void ROMV2_TFT::Init(DataSensorEnvironment* dataEnvironment,
     _displayIRTemp.Init(&_tft, _dataSkyState);
     _displayAcceleration.Init(&_tft, _dataAcceleration);
     _displayGPS.Init(&_tft, _dataGPS);
+    _displayTSL2591Calibration.Init(&_tft, _dataLuminosity);
 
     // Splash App
     DisplaySplashApp();
@@ -184,6 +185,10 @@ void ROMV2_TFT::UpdateDisplay()
                     _displayGPS.UpdateDisplay();
                     break;
 
+                case DISPLAY_TSL2591_CALIBRATION:
+                    _displayTSL2591Calibration.UpdateDisplay();
+                    break;
+
                 case DISPLAY_HOME:
                 default:
                     _displayHome.SetCurrentDisplay(_displayHomeType);
@@ -210,6 +215,7 @@ void ROMV2_TFT::ForceRedraw()
     _displayIRTemp.ForceRedraw();
     _displayAcceleration.ForceRedraw();
     _displayGPS.ForceRedraw();
+    _displayTSL2591Calibration.ForceRedraw();
 }
 
 /// <summary>
@@ -218,4 +224,36 @@ void ROMV2_TFT::ForceRedraw()
 void ROMV2_TFT::SetLuminosityIcon(bool on)
 {
     _displayHeader.SetLuminosityIcon(on);
+}
+
+/// <summary>
+/// Met à jour la valeur courante de la calibration du TSL2591
+/// </summary>
+void ROMV2_TFT::SetNewCalibrationValue(int newCalibrationValue)
+{
+    _displayTSL2591Calibration.SetNewCalibrationValue(newCalibrationValue);
+}
+
+/// <summary>
+/// Augmente la calibration du TSL2591 de 0.01 si < TSL2591_CALIBRATION_MAX_VALUE
+/// </summary>
+void ROMV2_TFT::IncreaseCalibrationValue()
+{
+    _displayTSL2591Calibration.IncreaseCalibrationValue();
+}
+
+/// <summary>
+/// Diminue la calibration du TSL2591 de 0.01 si > TSL2591_CALIBRATION_MIN_VALUE
+/// </summary>
+void ROMV2_TFT::DecreaseCalibrationValue()
+{
+    _displayTSL2591Calibration.DecreaseCalibrationValue();
+}
+
+/// <summary>
+/// Renvoi la nouvelle valeur de la calibration du TSL2591
+/// </summary>
+int ROMV2_TFT::GetNewCalibrationValue()
+{
+    return _displayTSL2591Calibration.GetNewCalibrationValue();
 }

@@ -27,11 +27,18 @@ void ROMV2_APP::Init()
 	_adxl345.Init(&_dataAcceleration);
 	_gps.Init(&_dataGPS);
 	_bluetoothLE.Init(&_bluetoothConnected, &_dataEnvironment, &_dataLuminosity, &_dataSkyState);
+
+	// Chargement de la valeur de tsl2591Calibration depuis la ROM
+	_tsl2591.LoadTSL2591Calibration();
+	_tft.SetNewCalibrationValue(_dataLuminosity.tsl2591Calibration);
+
+	// Démarrage de la tâche de lecture de la luminosité
 	_tsl2591.StartTask();
 
 	// Initialisation Chronos
 	_chronoReadJoystick = 0;
 	_chronoJoystickButtonPressed = 0;
+	_chronoJoystickButtonMoved = 0;
 	_chronoDisplayTimeout = millis();
 
 	// Initialisation des performances pour les traces
@@ -85,6 +92,8 @@ void ROMV2_APP::ReadJoystickState()
 	// Lecture de l'état du Joystick sur intervalle
 	if (millis() > _chronoReadJoystick + JOYSTICK_READ_INTERVAL)
 	{
+		bool addChronoInterval = true;
+
 		// Bouton du Joystick
 		if (digitalRead(JOYSTICK_PIN_SWITCH) == LOW)
 		{
@@ -140,19 +149,55 @@ void ROMV2_APP::ReadJoystickState()
 				debugln(F(""));
 				debugln(F("[ACTION] Left"));
 			}
-			else if (x > JOYSTICK_POSITION_MIN_VALUE_HIGH && !_joystickMoved)
+			else if (x > JOYSTICK_POSITION_MIN_VALUE_HIGH)
 			{
-				_joystickMoved = true;
-				_currentAction = ACTION_UP;
-				debugln(F(""));
-				debugln(F("[ACTION] Up"));
+				// Update des commandes uniquement si pas de mouvement en cours
+				if (!_joystickMoved)
+				{
+					_currentAction = ACTION_UP;
+					_joystickMoved = true;
+					_chronoJoystickButtonMoved = millis();
+
+					// Trace
+					debugln(F(""));
+					debugln(F("[ACTION] Up"));
+				}
+				// Sur l'écran Calibration et sur mouvement long, on update l'Action en cours afin d'accélérer la décrémentation
+				if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION && millis() > _chronoJoystickButtonMoved + JOYSTICK_MOVE_LONG_INTERVAL)
+				{
+					_currentAction = ACTION_UP;
+					_chronoJoystickButtonMoved += 50;
+					addChronoInterval = false;
+
+					// Trace
+					debugln(F(""));
+					debugln(F("[ACTION] Up"));
+				}
 			}
-			else if (x < JOYSTICK_POSITION_MIN_VALUE_LOW && !_joystickMoved)
+			else if (x < JOYSTICK_POSITION_MIN_VALUE_LOW)
 			{
-				_joystickMoved = true;
-				_currentAction = ACTION_DOWN;
-				debugln(F(""));
-				debugln(F("[ACTION] Down"));
+				// Update des commandes uniquement si pas de mouvement en cours
+				if (!_joystickMoved)
+				{
+					_currentAction = ACTION_DOWN;
+					_joystickMoved = true;
+					_chronoJoystickButtonMoved = millis();
+
+					// Trace
+					debugln(F(""));
+					debugln(F("[ACTION] Down"));
+				}
+				// Sur l'écran Calibration et sur mouvement long, on update l'Action en cours afin d'accélérer l'incrémentation
+				if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION && millis() > _chronoJoystickButtonMoved + JOYSTICK_MOVE_LONG_INTERVAL)
+				{
+					_currentAction = ACTION_DOWN;
+					_chronoJoystickButtonMoved += 50;
+					addChronoInterval = false;
+
+					// Trace
+					debugln(F(""));
+					debugln(F("[ACTION] Down"));
+				}
 			}
 			else
 			{
@@ -160,20 +205,28 @@ void ROMV2_APP::ReadJoystickState()
 					&& x > JOYSTICK_POSITION_MIN_VALUE_LOW
 					&& y < JOYSTICK_POSITION_MIN_VALUE_HIGH
 					&& y > JOYSTICK_POSITION_MIN_VALUE_LOW)
+				{
 					_joystickMoved = false;
-				// String trace = "X : " + String(x) + " / Y : " + String(y);
-				// debugln(trace);
+					_chronoJoystickButtonMoved = millis();
+				}
 			}
 		}
 
 		// Si une action est en cours, on force la mise à jour complète de l'affichage
 		if (_currentAction != ACTION_NONE)
 		{
-			_tft.ForceRedraw();
+			if (_currentDisplayScreenType != DISPLAY_TSL2591_CALIBRATION
+				|| (_currentAction != ACTION_UP && _currentAction != ACTION_DOWN))
+			{
+				_tft.ForceRedraw();
+			}
 		}
 
-		// Actualisation Chrono
-		_chronoReadJoystick = millis();
+		// Actualisation Chrono et Flag
+		if (addChronoInterval)
+		{
+			_chronoReadJoystick = millis();
+		}
 	}
 }
 
@@ -203,7 +256,7 @@ void ROMV2_APP::UpdateCurrentDisplay()
 			switch (_currentAction)
 			{
 				case ACTION_RIGHT:
-					if (_currentDisplayScreenType == DISPLAY_GPS)
+					if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION)
 					{
 						_currentDisplayScreenType = DISPLAY_HOME;
 					}
@@ -216,7 +269,7 @@ void ROMV2_APP::UpdateCurrentDisplay()
 				case ACTION_LEFT:
 					if (_currentDisplayScreenType == DISPLAY_HOME)
 					{
-						_currentDisplayScreenType = DISPLAY_GPS;
+						_currentDisplayScreenType = DISPLAY_TSL2591_CALIBRATION;
 					}
 					else
 					{
@@ -240,6 +293,11 @@ void ROMV2_APP::UpdateCurrentDisplay()
 					{
 						_tsl2591.ClearLuxAverage();
 					}
+					else if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION)
+					{
+						_tsl2591.SaveTSL2591Calibration(_tft.GetNewCalibrationValue());
+						_tft.SetNewCalibrationValue(_dataLuminosity.tsl2591Calibration);
+					}
 					break;
 
 				case ACTION_CLICK_LONG:
@@ -247,8 +305,25 @@ void ROMV2_APP::UpdateCurrentDisplay()
 					break;
 
 				case ACTION_UP:
+					if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION)
+					{
+						_tft.IncreaseCalibrationValue();
+					}
+					else
+					{
+						_currentDisplayScreenType = DISPLAY_HOME;
+					}
+					break;
+
 				case ACTION_DOWN:
-					_currentDisplayScreenType = DISPLAY_HOME;
+					if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION)
+					{
+						_tft.DecreaseCalibrationValue();
+					}
+					else
+					{
+						_currentDisplayScreenType = DISPLAY_HOME;
+					}
 					break;
 
 				case ACTION_NONE:
@@ -266,6 +341,7 @@ void ROMV2_APP::UpdateCurrentDisplay()
 
 		// RAZ de l'état de l'action en cours
 		_currentAction = ACTION_NONE;
+
 		// Sur action, RAZ du compteur de veille en cours
 		_chronoDisplayTimeout = millis();
 	}

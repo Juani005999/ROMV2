@@ -38,7 +38,7 @@ void ROMV2_BME280::ReadEnvironment()
         _dataEnvironment->pression = _bme280.readPressure() / 100;
         _dataEnvironment->humidite = _bme280.readHumidity();
         UpdateDewPoint();
-        UpdateDiewPointState();
+        UpdateDewPointState();
 
         // Trace
         debugln(F(""));
@@ -79,7 +79,7 @@ void ROMV2_BME280::UpdateDewPoint()
 /// <summary>
 /// MAJ de l'état du DewPoint
 /// </summary>
-void ROMV2_BME280::UpdateDiewPointState()
+void ROMV2_BME280::UpdateDewPointState()
 {
     // MAJ de l'état du DewPoint
     if (_dataEnvironment->temperature <= _dataEnvironment->dewPoint + 1)

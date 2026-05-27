@@ -160,6 +160,10 @@ void ROMV2_DISPLAY_HEADER::DisplayMainIcon()
 			_tft->pushImage(5, 5, 20, 20, icon_gps);
 			break;
 
+		case DISPLAY_TSL2591_CALIBRATION:
+			_tft->pushImage(5, 5, 20, 20, icon_settings);
+			break;
+
 		case DISPLAY_HOME:
 		default:
 			_tft->pushImage(5, 5, 20, 20, icon_home);

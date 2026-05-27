@@ -60,7 +60,8 @@ class ROMV2_APP : JUANITO_APP
     bool _joystickMoved;                                                    // Flag de mouvement du Joystick
 
     // Chronos
-    long _chronoReadJoystick;                                               // Chrono pour lecture de l'état du Joystick
-    long _chronoJoystickButtonPressed;                                      // Chrono de début de clic sur le switch du Joystick
-    long _chronoDisplayTimeout;                                             // Chrono de gestion de la mise en veille de l'affichage
+    unsigned long _chronoReadJoystick;                                      // Chrono pour lecture de l'état du Joystick
+    unsigned long _chronoJoystickButtonPressed;                             // Chrono de début de clic sur le switch du Joystick
+    unsigned long _chronoJoystickButtonMoved;                               // Chrono de début de mouvement du Joystick
+    unsigned long _chronoDisplayTimeout;                                    // Chrono de gestion de la mise en veille de l'affichage
 };

@@ -26,7 +26,7 @@ class ROMV2_BME280
   private:
     // Fonctions
       void UpdateDewPoint();
-      void UpdateDiewPointState();
+      void UpdateDewPointState();
 
     // Instanciation des objets internes
     Adafruit_BME280 _bme280;                                                // BME 280 : Capteur T°, Humidité, Pression Atmosphérique

@@ -36,6 +36,18 @@ class ROMV2_TSL2591
     /// </summary>
     void StartTask();
 
+    /// <summary>
+    /// Sauvegarde de la calibration du TSL2591
+    /// </summary>
+    /// <param name="value"></param>
+    void SaveTSL2591Calibration(int value);
+
+    /// <summary>
+    /// Chargement de la calibration du TSL2591
+    /// </summary>
+    /// <returns></returns>
+    void LoadTSL2591Calibration();
+
   private:
     // Fonctions
     void DisplaySensorDetails();
@@ -52,7 +64,7 @@ class ROMV2_TSL2591
     float GetGainValue();
     float GetTimingValue();
     float ComputeSolidAngle_sr(float totalAngle_deg);
-    LuxToMagConversionResult LuxToMagnitude(float lux);
+    LuxToMagConversionResult LuxToMagnitude(float lux, int tsl2591Calibration);
     static void TaskWrapper(void* pvParameters);
     void TaskLoop();
     float CorrectThermal(float lux);
@@ -60,6 +72,7 @@ class ROMV2_TSL2591
     // Instanciation des objets internes
     Adafruit_TSL2591 _tsl2591 = Adafruit_TSL2591(TSL2591_NUMBER_ID);      // TSL2591 : Capteur de luminosité
     ROMV2_TFT* _tft;
+    Preferences _preferences;
 
     // Membres internes
     DataSensorLuminosity* _dataLuminosity;

@@ -37,6 +37,7 @@
         - [Ecran Ir Température](#ecran-ir-température)
         - [Ecran Niveaux](#ecran-niveaux)
         - [Ecran GPS](#ecran-gps)
+        - [Ecran de calibration du capteur de luminosité TSL2591](#ecran-de-calibration-du-capteur-de-luminosité-tsl2591)
 - [Driver ASCOM](#driver-ascom)
     - [Installation](#installation)
     - [Détection du périphérique bluetooth dans Windows](#détection-du-périphérique-bluetooth-dans-windows)
@@ -79,6 +80,7 @@ Ce modèle est la version complète du [SQMLite](https://github.com/Juani005999/
 - Indicateur d'état du GPS.
 - Indicateur de charge restante dans la batterie.
 - Mise en veille de l'écran après 5 minutes d'inactivité ou sur demande.
+- Sauvegarde et lecture de la calibration en EEPROM permettant de stocker cette valeur même après extinction de l'appareil.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -332,7 +334,7 @@ Pour sortir du mode veille, il suffit d'effectuer une action sur le joystick, pe
 
 ### Logiciel
 
-Le firmware est constitué de 6 écrans, avec un en-tête commun à tous les écrans.
+Le firmware est constitué de 7 écrans, avec un en-tête commun à tous les écrans.
 
 #### En-tête
 
@@ -451,6 +453,24 @@ L'écran GPS permet d'afficher les données issues du GPS. Il comprend les élé
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
+#### Ecran de calibration du capteur de luminosité TSL2591
+
+![Screen Calibration TSL2591](screenshots/Screen_Calibration_TSL2591.png)
+
+L'écran de calibration du capteur de luminosité TSL2591 permet de définir de calibration qui sera utilisée lors du calcul du SQM (et du Bortle). Il comprend les éléments suivants :
+- La valeur actuelle.
+- La nouvelle valeur à enregistrer en EEPROM.
+
+> [!NOTE]
+> Vous pouvez modifier cette valeur grâce au joystick :
+>- Un mouvement court vers le haut incrémente la valeur de 0.01.
+>- Un mouvement long vers le haut augmente rapidement la valeur.
+>- Un mouvement court vers le bas décrémente la valeur de 0.01.
+>- Un mouvement long vers le haut diminue rapidement la valeur.
+>- Un clic sur le joystick permet l'enregistrement de cette nouvelle valeur en EEPROM.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ## Driver ASCOM
 
 ![Driver Setup Dialog](screenshots/Driver_SetupDialog.png)
@@ -526,6 +546,7 @@ Voici un petit retour d'expérience des mesures de l'état de mon ciel à mon do
 
 | Date | Version | Commentaires |
 | --- | --- | --- |
+| 27/05/2026 | 2.0.3.1 | <ul><li>Ajout d'un nouvel écran permettant la calibration du capteur de luminosité TSL2591.</li><li>Sauvegarde et lecture de la calibration en EEPROM permettant de stocker cette valeur même après extinction de l'appareil.</ul> |
 | 23/05/2026 | 2.0.2.1 | Correction thermique de la lecture de la luminosité avec la température ambiante |
 | 17/05/2026 | 2.0.1.1 | Simplification du train optique du TSL2591 |
 | 08/05/2026 | 2.0.1.1 | Lecture de la luminosité dans une tâche dédiée FreeRTOS s'exécutant en paralèlle sur le 2ème coeur de l'ESP 32 |
