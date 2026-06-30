@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="VeuillezDeconnecterLeModuleSQMLitePourAccederAuxParametres" xml:space="preserve">
+    <value>Please disconnect SQMLite module to access settings</value>
+  </data>
+  <data name="PortSerie" xml:space="preserve">
+    <value>Detected BLE Devices list</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="DefaultIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ASCOM.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="JuanitoDelPepito" xml:space="preserve">
+    <value>Juanito del Pepito</value>
+  </data>
+  <data name="ModuleSQMLiteDejaConnecte" xml:space="preserve">
+    <value>SQMLite module already connected</value>
+  </data>
+  <data name="PasDeModuleSQMLiteDetecte" xml:space="preserve">
+    <value>No SQMLite module detected</value>
+  </data>
+  <data name="ModeTraceActive" xml:space="preserve">
+    <value>Trace log enable</value>
+  </data>
+  <data name="GithubDuSQMLite" xml:space="preserve">
+    <value>Github of the SQMLite project</value>
+  </data>
+  <data name="DriverASCOMPourModuleSQMLite" xml:space="preserve">
+    <value>ASCOM Driver for SQMLite</value>
+  </data>
+  <data name="ParametresDuPeripheriqueSQMLite" xml:space="preserve">
+    <value>SQMLite device settings</value>
+  </data>
+  <data name="ErreurLorsDeLEnvoiDeLaCommande" xml:space="preserve">
+    <value>An error occured while sending command</value>
+  </data>
+  <data name="ASCOM" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ASCOM.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PasDePortSerieDefiniDansLesParametres" xml:space="preserve">
+    <value>No serial port defined</value>
+  </data>
+  <data name="SQMLite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SQMLite.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AppName" xml:space="preserve">
+    <value>SQMLite</value>
+  </data>
+  <data name="CaractéristiqueXTrouvee" xml:space="preserve">
+    <value>Characteristic {0} found</value>
+  </data>
+  <data name="Connexion" xml:space="preserve">
+    <value>Connection...</value>
+  </data>
+  <data name="ConnexionAuPeripheriqueEffectueeAvecSucces" xml:space="preserve">
+    <value>Connection to device {0} successfully established</value>
+  </data>
+  <data name="Deconnexion" xml:space="preserve">
+    <value>Disconnect...</value>
+  </data>
+  <data name="DeconnexionDuPeripheriqueEffectueeAvecSucces" xml:space="preserve">
+    <value>Device {0} successfully disconnected</value>
+  </data>
+  <data name="DemarageDeLInitialisation" xml:space="preserve">
+    <value>Starting initialisation</value>
+  </data>
+  <data name="ErreurLectureCaracteristiqueXY" xml:space="preserve">
+    <value>Characteristic reading error {0}: {1}</value>
+  </data>
+  <data name="ErreurX" xml:space="preserve">
+    <value>Error : {0}</value>
+  </data>
+  <data name="ImpossibleDeSeConnecterAuPeripheriqueBLE" xml:space="preserve">
+    <value>Unable to connect to the BLE device</value>
+  </data>
+  <data name="InitialisationEffectueeAvecSucces" xml:space="preserve">
+    <value>Initialisation done succesfully</value>
+  </data>
+  <data name="LectureCaracteristiqueXValeurY" xml:space="preserve">
+    <value>Characteristic {0}, value = {1}</value>
+  </data>
+  <data name="LectureDeLaValeurDeLaCaracteristiqueX" xml:space="preserve">
+    <value>Reading the value of the characteristic {0}</value>
+  </data>
+  <data name="LuminositeDuCiel" xml:space="preserve">
+    <value>Sky brightness</value>
+  </data>
+  <data name="PasDeCustomActionsSupporteesRenvoiDUneListeVide" xml:space="preserve">
+    <value>No custom actions supported. Empty list returned.</value>
+  </data>
+  <data name="PointDeRosee" xml:space="preserve">
+    <value>Dew point</value>
+  </data>
+  <data name="PressionAtmospherique" xml:space="preserve">
+    <value>Atmospheric pressure</value>
+  </data>
+  <data name="QualiteDuCiel" xml:space="preserve">
+    <value>Sky quality</value>
+  </data>
+  <data name="SQMLiteBLEDeviceTrouveTentativeDeConnexion" xml:space="preserve">
+    <value>SQMLite BLE Device found. Attempting to connect...</value>
+  </data>
+  <data name="SQMLiteBLEServiceTrouve" xml:space="preserve">
+    <value>SQMLite BLE Service found</value>
+  </data>
+  <data name="TauxDHumidite" xml:space="preserve">
+    <value>Humidity rate</value>
+  </data>
+  <data name="TemperatureAmbiante" xml:space="preserve">
+    <value>Ambient temperature</value>
+  </data>
+  <data name="TimeoutConnexionBLEImpossibleApres15Secondes" xml:space="preserve">
+    <value>Timeout: BLE connection failed after 15 seconds</value>
+  </data>
+  <data name="ValeurXLectureEnYMs" xml:space="preserve">
+    <value>Value : {0} - Read in {1} ms</value>
+  </data>
+  <data name="VousNAvezAppaireAucunPeripherique" xml:space="preserve">
+    <value>You have not paired any devices</value>
+  </data>
+</root>

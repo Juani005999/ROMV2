@@ -170,14 +170,16 @@ void ROMV2_DISPLAY_TSL2591_CALIBRATION::DisplayCalibration()
 
 	// Valeur actuel de Calibration
 	_tft->setTextColor(TFT_DARKGREY, TFT_LIGHTGREY);
-	_tft->setCursor(90, 80);
 	if (!isnan(_dataLuminosity->tsl2591Calibration))
 	{
 		sprintf(stringBuffer, "%.2f", _dataLuminosity->tsl2591Calibration / 100.0f);
 	}
-	while (strlen(stringBuffer) < 6)
+	len = strlen(stringBuffer);
+	addChar = 6 - len;
+	if (addChar > 0 && addChar + len < 20)
 	{
-		strcat(stringBuffer, " ");
+		memmove(stringBuffer + addChar, stringBuffer, len + 1);
+		memset(stringBuffer, ' ', addChar);
 	}
-	_tft->print(stringBuffer);
+	_tft->drawRightString(stringBuffer, 125, 80, 1);
 }

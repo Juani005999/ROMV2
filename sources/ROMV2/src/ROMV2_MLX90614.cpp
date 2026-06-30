@@ -46,8 +46,20 @@ void ROMV2_MLX90614::ReadIRTemp()
     // Lecture de luminosité sur intervalle
     if (millis() > _chronoReadIRTemp + READ_IRTEMP_INTERVAL)
     {
-        _dataSkyState->tempAmbient = _mlx90614.readAmbientTempC();
-        _dataSkyState->tempObject = _mlx90614.readObjectTempC();
+        // Chrono repositionné dès maintenant (lecture OU saut si bus I2C occupé)
+        _chronoReadIRTemp = millis();
+
+        // Accès I2C protégé par le verrou de bus (timeout court)
+        {
+            I2CLock lock(pdMS_TO_TICKS(10));
+            if (!lock.ok())
+                return;     // bus occupé -> on saute ce cycle, valeurs précédentes conservées
+
+            _dataSkyState->tempAmbient = _mlx90614.readAmbientTempC();
+            _dataSkyState->tempObject = _mlx90614.readObjectTempC();
+        }   // verrou rendu ici
+
+        // Calcul de l'état du ciel à partir des valeures mesurées
         UpdateSkyState();
 
         debugln(F(""));
@@ -56,18 +68,10 @@ void ROMV2_MLX90614::ReadIRTemp()
         debug("*C\tObject = ");
         debug(_dataSkyState->tempObject);
         debugln("*C");
-        debug("[IRTEMP] Ambient = ");
-        debug(_mlx90614.readAmbientTempF());
-        debug("*F\tObject = ");
-        debug(_mlx90614.readObjectTempF());
-        debugln("*F");
         debug("[IRTEMP] SkyState = ");
         debugln(_dataSkyState->skyState);
         debug("[IRTEMP] Cloud Cover = ");
         debugln(_dataSkyState->cloudCover);
-
-        // Actualisation flag et compteurs
-        _chronoReadIRTemp = millis();
     }
 }
 

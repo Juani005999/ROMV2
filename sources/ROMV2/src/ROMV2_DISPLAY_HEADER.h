@@ -15,11 +15,22 @@ class ROMV2_DISPLAY_HEADER
     /// <summary>
     /// Initialisation
     /// </summary>
+    /// <param name="appType"></param>
     /// <param name="tft"></param>
     /// <param name="dataEnvironment"></param>
     /// <param name="dataGPS"></param>
+    /// <param name="dataWifi"></param>
+    /// <param name="dataMqtt"></param>
     /// <param name="bluetoothConnected"></param>
-    void Init(TFT_eSPI * tft, DataSensorEnvironment* dataEnvironment, DataSensorGPS* dataGPS, bool* bluetoothConnected);
+    /// <param name="networkMode"></param>
+    void Init(APP_TYPE appType,
+        TFT_eSPI * tft,
+        DataSensorEnvironment* dataEnvironment,
+        DataSensorGPS* dataGPS,
+        DataWifi* dataWifi,
+        DataMqtt* dataMqtt,
+        bool* bluetoothConnected,
+        NETWORK_MODE* networkMode);
 
     /// <summary>
     /// Actualisation de l'affichage
@@ -46,22 +57,33 @@ class ROMV2_DISPLAY_HEADER
   private:
     // Fonctions
     void ClearDisplay();
+    void DisplayTitle();
     void DisplayDate();
     void DisplayMainIcon();
     void DisplayGPSIcon();
+    void DisplayNetworkIcon();
     void DisplayBluetoothIcon();
+    void DisplayWifiIcon();
+    void DisplayOfflineIcon();
 
     // Instanciation des objets internes
     TFT_eSPI * _tft;
 
     // Membres internes
-    DISPLAY_SCREEN_TYPE _currentDisplayScreenType = DISPLAY_HOME;
-    bool _forceRedraw = true;
-    DataSensorEnvironment* _dataEnvironment;
-    DataSensorGPS* _dataGPS;
-    bool* _bluetoothConnected;
-    bool _iconGPSLastState = false;
-    bool _iconBluetoothLastState = false;
-    bool firstLuminosityIcon = true;
-    bool lastLuminosityIconState = false;
+    APP_TYPE                _appType                    = APP_ROMV2;
+    DISPLAY_SCREEN_TYPE     _currentDisplayScreenType   = DISPLAY_HOME;
+    bool                    _forceRedraw                = true;
+    DataSensorEnvironment*  _dataEnvironment            = nullptr;
+    DataSensorGPS*          _dataGPS                    = nullptr;
+    DataWifi*               _dataWifi                   = nullptr;
+    DataMqtt*               _dataMqtt                   = nullptr;
+    bool*                   _bluetoothConnected         = nullptr;
+    NETWORK_MODE*           _networkMode                = nullptr;
+    bool                    _iconGPSLastState           = false;
+    bool                    _iconBluetoothLastState     = false;
+    bool                    firstLuminosityIcon         = true;
+    bool                    lastLuminosityIconState     = false;
+    WIFI_STATE              lastWifiState               = WIFI_STATE_STA;
+    bool                    lastWifiConnectedState      = false;
+    bool                    lastMqttConnectedState      = false;
 };

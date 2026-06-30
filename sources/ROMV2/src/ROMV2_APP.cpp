@@ -8,51 +8,39 @@ ROMV2_APP::ROMV2_APP()
 }
 
 /// <summary>
-/// Initialisation de l'App
+/// Initialisation des capteurs propres au modèle complet.
 /// </summary>
-void ROMV2_APP::Init()
+void ROMV2_APP::InitModelSensors()
 {
-	// Positionnement des PIN
-	pinMode(JOYSTICK_PIN_SWITCH, INPUT_PULLUP);
-	digitalWrite(JOYSTICK_PIN_SWITCH, HIGH);
-	
-	// Initialisation Wire avec définition des PIN SDA/SCL
-	Wire.setPins(ESP32_GPIO_SDA, ESP32_GPIO_SCL);
+	// Initialisation des membres
+	_tft = new ROMV2_TFT();
+
+	// Initiaisation du type d'application en cours
+	_appType = APP_ROMV2;
 
 	// Initialisation des objets représentant les capteurs et périphériques
-	_tft.Init(&_dataEnvironment, &_dataLuminosity, &_dataSkyState, &_dataAcceleration, &_dataGPS, &_bluetoothConnected);
+	_tft->Init(_appType, &_dataEnvironment, &_dataLuminosity, &_dataSkyState, &_dataAcceleration, &_dataGPS, &_dataWifi, &_dataMqtt, &_bluetoothConnected, &_networkMode);
 	_bme280.Init(&_dataEnvironment);
-	_tsl2591.Init(&_tft, &_dataLuminosity, &_dataEnvironment);
+	_tsl2591.Init(_tft, &_dataLuminosity, &_dataEnvironment);
 	_mlx90614.Init(&_dataSkyState);
 	_adxl345.Init(&_dataAcceleration);
 	_gps.Init(&_dataGPS);
-	_bluetoothLE.Init(&_bluetoothConnected, &_dataEnvironment, &_dataLuminosity, &_dataSkyState);
-
-	// Chargement de la valeur de tsl2591Calibration depuis la ROM
-	_tsl2591.LoadTSL2591Calibration();
-	_tft.SetNewCalibrationValue(_dataLuminosity.tsl2591Calibration);
-
-	// Démarrage de la tâche de lecture de la luminosité
-	_tsl2591.StartTask();
-
-	// Initialisation Chronos
-	_chronoReadJoystick = 0;
-	_chronoJoystickButtonPressed = 0;
-	_chronoJoystickButtonMoved = 0;
-	_chronoDisplayTimeout = millis();
-
-	// Initialisation des performances pour les traces
-	InitAppPerformances();
+	if (_networkMode == NETWORK_BLE)
+	{
+		_bluetoothLE.Init(_appType, &_bluetoothConnected, &_dataEnvironment, &_dataLuminosity, &_dataSkyState);
+	}
+	if (_networkMode == NETWORK_WIFI)
+	{
+		_wifi.Init(_appType, &_dataWifi, &_dataMqtt);
+		_mqtt.Init(_appType, &_dataWifi, &_dataMqtt, &_dataEnvironment, &_dataLuminosity, &_dataSkyState, &_dataAcceleration, &_dataGPS);
+	}
 }
 
 /// <summary>
-/// Processus complet a exécuter lors d'un Loop
+/// Lectures cadencées des capteurs propres au modèle complet.
 /// </summary>
-void ROMV2_APP::Loop()
+void ROMV2_APP::LoopModelSensors()
 {
-	// Lecture de l'état du Joystick
-	ReadJoystickState();
-
 	// Lecture température, humidité, pression atm. et point de rosée
 	_bme280.ReadEnvironment();
 
@@ -63,25 +51,20 @@ void ROMV2_APP::Loop()
 	_mlx90614.ReadIRTemp();
 
 	// Lecture Accélération uniquement si l'affichage courant est DISPLAY_ACCELERATION
+	// Sur l'écran niveau à bulle : on suspend la lecture TSL pour libérer le bus I2C à l'ADXL.
 	if (_currentDisplayScreenType == DISPLAY_ACCELERATION)
 	{
+		_tsl2591.SetReadingPaused(true);
 		_adxl345.ReadAcceleration();
 	}
-  
+	else
+	{
+		_tsl2591.SetReadingPaused(false);
+	}
+
 	// Lecture des données GPS et vérification de l'état du GPS
 	_gps.ReadGPS();
 	_gps.CheckGPSState();
-
-	// Envoi des notifications des caractéristiques du BLE (Bluetooth Low Energy)
-	_bluetoothLE.Notify();
-
-	// Actualisation du display
-	UpdateCurrentDisplay();
-	_tft.SetCurrentDisplay(_currentDisplayScreenType, _displayHomeType);
-	_tft.UpdateDisplay();
-
-	// Trace des performances
-	TraceAppPerformances();
 }
 
 /// <summary>
@@ -135,21 +118,21 @@ void ROMV2_APP::ReadJoystickState()
 			int x = analogRead(JOYSTICK_PIN_X);
 			int y = analogRead(JOYSTICK_PIN_Y);
 
-			if (y > JOYSTICK_POSITION_MIN_VALUE_HIGH && !_joystickMoved)
+			if (y > ROMV2_JOYSTICK_POSITION_MIN_VALUE_HIGH && !_joystickMoved)
 			{
 				_joystickMoved = true;
 				_currentAction = ACTION_RIGHT;
 				debugln(F(""));
 				debugln(F("[ACTION] Right"));
 			}
-			else if (y < JOYSTICK_POSITION_MIN_VALUE_LOW && !_joystickMoved)
+			else if (y < ROMV2_JOYSTICK_POSITION_MIN_VALUE_LOW && !_joystickMoved)
 			{
 				_joystickMoved = true;
 				_currentAction = ACTION_LEFT;
 				debugln(F(""));
 				debugln(F("[ACTION] Left"));
 			}
-			else if (x > JOYSTICK_POSITION_MIN_VALUE_HIGH)
+			else if (x > ROMV2_JOYSTICK_POSITION_MIN_VALUE_HIGH)
 			{
 				// Update des commandes uniquement si pas de mouvement en cours
 				if (!_joystickMoved)
@@ -174,7 +157,7 @@ void ROMV2_APP::ReadJoystickState()
 					debugln(F("[ACTION] Up"));
 				}
 			}
-			else if (x < JOYSTICK_POSITION_MIN_VALUE_LOW)
+			else if (x < ROMV2_JOYSTICK_POSITION_MIN_VALUE_LOW)
 			{
 				// Update des commandes uniquement si pas de mouvement en cours
 				if (!_joystickMoved)
@@ -201,10 +184,10 @@ void ROMV2_APP::ReadJoystickState()
 			}
 			else
 			{
-				if (x < JOYSTICK_POSITION_MIN_VALUE_HIGH
-					&& x > JOYSTICK_POSITION_MIN_VALUE_LOW
-					&& y < JOYSTICK_POSITION_MIN_VALUE_HIGH
-					&& y > JOYSTICK_POSITION_MIN_VALUE_LOW)
+				if (x < ROMV2_JOYSTICK_POSITION_MIN_VALUE_HIGH
+					&& x > ROMV2_JOYSTICK_POSITION_MIN_VALUE_LOW
+					&& y < ROMV2_JOYSTICK_POSITION_MIN_VALUE_HIGH
+					&& y > ROMV2_JOYSTICK_POSITION_MIN_VALUE_LOW)
 				{
 					_joystickMoved = false;
 					_chronoJoystickButtonMoved = millis();
@@ -218,7 +201,7 @@ void ROMV2_APP::ReadJoystickState()
 			if (_currentDisplayScreenType != DISPLAY_TSL2591_CALIBRATION
 				|| (_currentAction != ACTION_UP && _currentAction != ACTION_DOWN))
 			{
-				_tft.ForceRedraw();
+				_tft->ForceRedraw();
 			}
 		}
 
@@ -231,118 +214,24 @@ void ROMV2_APP::ReadJoystickState()
 }
 
 /// <summary>
-/// Actualise l'affichage en cours sur action du Joystick
+/// Ordre complet des écrans navigables au joystick pour le modèle ROMV2.
+/// L'écran WiFi reste filtré à l'exécution par IsScreenVisible (présent seulement en mode WiFi).
 /// </summary>
-void ROMV2_APP::UpdateCurrentDisplay()
+const DISPLAY_SCREEN_TYPE* ROMV2_APP::GetScreenOrder(uint8_t& count) const
 {
-	// Gestion de la mise en veille de l'affichage
-	if (_currentAction == ACTION_NONE && millis() > _chronoDisplayTimeout + SCREEN_TIMEOUT)
+	static const DISPLAY_SCREEN_TYPE order[] =
 	{
-		_currentDisplayScreenType = DISPLAY_NONE;
-	}
+		DISPLAY_HOME,
+		DISPLAY_LUX,
+		DISPLAY_ENVIRONMENT,
+		DISPLAY_IRTEMP,
+		DISPLAY_ACCELERATION,
+		DISPLAY_GPS,
+		DISPLAY_NETWORK,
+		DISPLAY_WIFI,
+		DISPLAY_TSL2591_CALIBRATION
+	};
 
-	// On ne fait rien si pas d'actions en cours
-	if (_currentAction != ACTION_NONE)
-	{
-		// Si l'affichage est en mode veille, on le sort de la veille
-		if (_currentDisplayScreenType == DISPLAY_NONE)
-		{
-			_currentDisplayScreenType = DISPLAY_HOME;
-		}
-		// Sinon, on positionne l'affichage en fonction de l'action en cours
-		else
-		{
-			// En fonction de l'action en cours
-			switch (_currentAction)
-			{
-				case ACTION_RIGHT:
-					if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION)
-					{
-						_currentDisplayScreenType = DISPLAY_HOME;
-					}
-					else
-					{
-						_currentDisplayScreenType = static_cast<DISPLAY_SCREEN_TYPE>(static_cast<int>(_currentDisplayScreenType) + 1);
-					}
-					break;
-
-				case ACTION_LEFT:
-					if (_currentDisplayScreenType == DISPLAY_HOME)
-					{
-						_currentDisplayScreenType = DISPLAY_TSL2591_CALIBRATION;
-					}
-					else
-					{
-						_currentDisplayScreenType = static_cast<DISPLAY_SCREEN_TYPE>(static_cast<int>(_currentDisplayScreenType) - 1);
-					}
-					break;
-
-				case ACTION_CLICK:
-					if (_currentDisplayScreenType == DISPLAY_HOME)
-					{
-						if (_displayHomeType == DISPLAY_HOME_SQM)
-						{
-							_displayHomeType = DISPLAY_HOME_LUX;
-						}
-						else
-						{
-							_displayHomeType = DISPLAY_HOME_SQM;
-						}
-					}
-					else if (_currentDisplayScreenType == DISPLAY_LUX)
-					{
-						_tsl2591.ClearLuxAverage();
-					}
-					else if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION)
-					{
-						_tsl2591.SaveTSL2591Calibration(_tft.GetNewCalibrationValue());
-						_tft.SetNewCalibrationValue(_dataLuminosity.tsl2591Calibration);
-					}
-					break;
-
-				case ACTION_CLICK_LONG:
-					_currentDisplayScreenType = DISPLAY_NONE;
-					break;
-
-				case ACTION_UP:
-					if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION)
-					{
-						_tft.IncreaseCalibrationValue();
-					}
-					else
-					{
-						_currentDisplayScreenType = DISPLAY_HOME;
-					}
-					break;
-
-				case ACTION_DOWN:
-					if (_currentDisplayScreenType == DISPLAY_TSL2591_CALIBRATION)
-					{
-						_tft.DecreaseCalibrationValue();
-					}
-					else
-					{
-						_currentDisplayScreenType = DISPLAY_HOME;
-					}
-					break;
-
-				case ACTION_NONE:
-				default:
-					break;
-			}
-		}
-
-		// Trace
-		debugln(F(""));
-		debug(F("[DISPLAY] ScreenType: "));
-		debug(_currentDisplayScreenType);
-		debug(F(" / HomeType: "));
-		debugln(_displayHomeType);
-
-		// RAZ de l'état de l'action en cours
-		_currentAction = ACTION_NONE;
-
-		// Sur action, RAZ du compteur de veille en cours
-		_chronoDisplayTimeout = millis();
-	}
+	count = sizeof(order) / sizeof(order[0]);
+	return order;
 }

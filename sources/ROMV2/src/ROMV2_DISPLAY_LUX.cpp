@@ -76,7 +76,7 @@ void ROMV2_DISPLAY_LUX::DisplayLux()
 
 		// Libellés
 		_tft->setTextColor(TFT_BLACK, TFT_LIGHTGREY);
-		_tft->drawRightString(F("Ir/Full :"), 80, 45, 1);
+		_tft->drawRightString(F("Ir/Full:"), 80, 45, 1);
 		_tft->drawRightString(F("Visible:"), 80, 55, 1);
 		_tft->drawRightString(F("Lux:"), 80, 65, 1);
 		_tft->drawRightString(F("Lux Moy.:"), 80, 75, 1);

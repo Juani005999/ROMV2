@@ -34,9 +34,21 @@ void ROMV2_BME280::ReadEnvironment()
     // Lecture de l'environnement sur intervalle
     if (millis() > _chronoReadEnvironment + READ_ENVIRONMENT_INTERVAL)
     {
-        _dataEnvironment->temperature = _bme280.readTemperature();
-        _dataEnvironment->pression = _bme280.readPressure() / 100;
-        _dataEnvironment->humidite = _bme280.readHumidity();
+        // Chrono repositionné dès maintenant (lecture OU saut si bus I2C occupé)
+        _chronoReadEnvironment = millis();
+
+        // Accès I2C protégé par le verrou de bus (timeout court)
+        {
+            I2CLock lock(pdMS_TO_TICKS(10));
+            if (!lock.ok())
+                return;     // bus occupé -> on saute ce cycle, valeurs précédentes conservées
+
+            _dataEnvironment->temperature = _bme280.readTemperature();
+            _dataEnvironment->pression = _bme280.readPressure() / 100;
+            _dataEnvironment->humidite = _bme280.readHumidity();
+        }   // verrou rendu ici, avant les calculs
+
+        // Calcul du point de Rosée issu des mesures
         UpdateDewPoint();
         UpdateDewPointState();
 
@@ -54,9 +66,6 @@ void ROMV2_BME280::ReadEnvironment()
         debug(F("[ENV] Point de rosée : "));
         debug(_dataEnvironment->dewPoint);
         debugln(F(""));
-
-        // Actualisation flag et compteurs
-        _chronoReadEnvironment = millis();
     }
 }
 

@@ -20,7 +20,8 @@ public:
     /// <param name="dataLuminosity"></param>
     /// <param name="dataSkyState"></param>
     /// <param name="dataGPS"></param>
-    void Init(TFT_eSPI* tft,
+    void Init(APP_TYPE appType,
+                TFT_eSPI* tft,
                 DataSensorEnvironment* dataEnvironment,
                 DataSensorLuminosity* dataLuminosity,
                 DataSensorSkyState* dataSkyState,
@@ -51,17 +52,19 @@ private:
     void DisplayDewPoint();
     void DisplayBortle();
     void DisplaySkyState();
+    void DisplaySensorValues();
 
     // Instanciation des objets internes
     TFT_eSPI* _tft;
 
     // Membres internes
-    DISPLAY_HOME_TYPE _displayHomeType = DISPLAY_HOME_LUX;
-    bool _forceRedraw = true;
-    DataSensorEnvironment* _dataEnvironment;
-    DataSensorLuminosity* _dataLuminosity;
-    DataSensorSkyState* _dataSkyState;
-    DataSensorGPS* _dataGPS;
-    SKY_STATE _skyStateLast = SKY_STATE_UNKNOWN;
-    DEWPOINT_STATE _dewPointStateLast = DEWPOINT_STATE_UNKNOWN;
+    APP_TYPE                _appType            = APP_ROMV2;
+    DISPLAY_HOME_TYPE       _displayHomeType    = DISPLAY_HOME_SQM;
+    bool                    _forceRedraw        = true;
+    DataSensorEnvironment*  _dataEnvironment    = nullptr;
+    DataSensorLuminosity*   _dataLuminosity     = nullptr;
+    DataSensorSkyState*     _dataSkyState       = nullptr;
+    DataSensorGPS*          _dataGPS            = nullptr;
+    SKY_STATE               _skyStateLast       = SKY_STATE_UNKNOWN;
+    DEWPOINT_STATE          _dewPointStateLast  = DEWPOINT_STATE_UNKNOWN;
 };

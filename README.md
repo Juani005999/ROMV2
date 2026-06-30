@@ -1,21 +1,35 @@
-# ROMV2
+# ROMV2 / SQM Lite
 
-![ROM V2](screenshots/ROMV2.jpg)
+![ROM V2 et SQM Lite](screenshots/Projet_Big.png)
 
 ## Sommaire
 - [Description](#description)
     - [Fonctionnalités](#fonctionnalités)
+    - [Modèles](#modèles)
+        - [Fonctionnalités par modèle](#fonctionnalités-par-modèle)
+        - [Écrans disponibles](#écrans-disponibles)
     - [Echelle de Bortle](#echelle-de-bortle)
 - [Liste des pièces](#liste-des-pièces)
-    - [Amazon](#amazon)
-    - [Ali Express](#ali-express)
-    - [Visserie & Divers](#visserie--divers)
+    - [Liste des pièces du ROMV2](#liste-des-pièces-du-romv2)
+        - [Amazon](#amazon)
+        - [Ali Express](#ali-express)
+        - [Visserie & Divers](#visserie--divers)
+    - [Liste des pièces du SQMLite](#liste-des-pièces-du-sqmlite)
+        - [Amazon](#amazon-1)
+        - [Ali Express](#ali-express-1)
+        - [Visserie & Divers](#visserie--divers-1)
 - [Montage](#montage)
-    - [Breadboard](#breadboard)
-    - [PCB](#pcb)
+    - [Montage du ROMV2](#montage-du-romv2)
+        - [Breadboard](#breadboard)
+        - [PCB](#pcb)
+        - [ESP32](#esp32)
+        - [Capteurs](#capteurs)
+    - [Montage du SQMLite](#montage-du-sqmlite)
+        - [Breadboard](#breadboard-1)
+        - [PCB](#pcb-1)
+        - [ESP32](#esp32-1)
+        - [Capteurs](#capteurs-1)
     - [Boxes](#boxes)
-    - [ESP32](#esp32)
-    - [Capteurs](#capteurs)
     - [Optique du TSL2591](#optique-du-tsl2591)
 - [Firmware](#firmware)
     - [Bibliothèques nécessaires à l'application](#bibliothèques-nécessaires-à-lapplication)
@@ -26,11 +40,13 @@
     - [Implémentation](#implémentation)
     - [Mode \"Debug\"](#mode-debug)
 - [Utilisation](#utilisation)
-    - [Matériel](#matériel)
-    - [Calibration](#calibration)
+    - [Matériel (ROMV2)](#matériel-romv2)
+    - [Matériel (SQMLite)](#matériel-sqmlite)
+    - [Navigation](#navigation)
     - [Mise en veille](#mise-en-veille)
     - [Logiciel](#logiciel)
-        - [En-tête](#en-tête)
+        - [En-tête (ROMV2)](#en-tête-romv2)
+        - [En-tête (SQMLite)](#en-tête-sqmlite)
         - [Ecran d'accueil](#ecran-daccueil)
         - [Ecran Luminosité](#ecran-luminosité)
         - [Ecran Environnement](#ecran-environnement)
@@ -48,7 +64,7 @@
 - [Révisions](#révisions)
 
 ## Description
-Le ROMV2 est un Sky Quality Meter (SQM) DIY (Do It Yourself) contenant les composants suivant :
+Le **ROMV2** est un Sky Quality Meter (SQM) DIY (Do It Yourself) contenant les composants suivant :
 - TSL2591
 - MLX90614
 - BME280
@@ -56,7 +72,12 @@ Le ROMV2 est un Sky Quality Meter (SQM) DIY (Do It Yourself) contenant les compo
 - GPS NEO 8M
 - TFT ST7735
 
-Ce modèle est la version complète du [SQMLite](https://github.com/Juani005999/SQMLite), avec le GPS, l'accéléromètre et la lecture de la température du ciel.
+Le **SQMLite** est un Sky Quality Meter (SQM) DIY (Do It Yourself) contenant les composants suivant :
+- TSL2591
+- BME280
+- TFT ST7735
+
+Le **SQMLite** est une version à moindre coût, centrée sur la mesure de qualité du ciel (SQM / Bortle) et des conditions d'environnement, sans la partie état du ciel, niveau à bulle ni GPS.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -68,19 +89,56 @@ Ce modèle est la version complète du [SQMLite](https://github.com/Juani005999/
 - Moyenne mobile du lux sur 50 valeurs permettant de réduire l'incertitude mesurée. Calcul du SQM et du Bortle sur la moyenne mobile du lux.
 - Possibilité de remise à zéro de la moyenne mobile.
 - Réglage automatique de la sensibilité (1x, 25x, 428x, 9876x) et de la durée de mesure (100ms, 200ms, 300ms, 400ms, 500ms, 600ms) du capteur de luminosité TSL2591.
-- Lecture de la qualité du ciel (3 états : ciel clair / peu nuageux / nuageux) via le capteur MLX90614 permettant la lecture de la température du ciel.
+- (*) Lecture de la qualité du ciel (3 états : ciel clair / peu nuageux / nuageux) via le capteur MLX90614 permettant la lecture de la température du ciel.
 - Lecture des conditions d'environnement (Température, taux d'humidité, pression atmosphérique) via le capteur BME280.
 - Calcul du point de rosée.
-- Niveaux à bulle permettant de diriger l'optique vers le zénith grâce au capteur ADXL345.
-- Coordonnées GPS et Date/Heure UTC issues du capteur GPS NEO 8M.
+- (*) Niveaux à bulle permettant de diriger l'optique vers le zénith grâce au capteur ADXL345.
+- (*) Coordonnées GPS et Date/Heure UTC issues du capteur GPS NEO 8M.
 - Connection Bluetooth BLE.
 - Driver ASCOM permettant de se connecter via Bluetooth BLE.
+- Connection Wifi et Broker MQTT.
 - Indicateur de mesure de luminosité en cours.
-- Indicateur d'état d'une connection Bluetooth BLE client.
-- Indicateur d'état du GPS.
+- Indicateur d'état de connection Bluetooth BLE client / Wifi MQTT / Offline.
+- (*) Indicateur d'état du GPS.
 - Indicateur de charge restante dans la batterie.
 - Mise en veille de l'écran après 5 minutes d'inactivité ou sur demande.
-- Sauvegarde et lecture de la calibration en EEPROM permettant de stocker cette valeur même après extinction de l'appareil.
+- Ecran de calibration du capteur de luminosité (TSL2591) avec sauvegarde et lecture de la calibration en EEPROM permettant de stocker cette valeur même après extinction de l'appareil.
+- Ecran de sélection de la connection réseau : Bluetooth BLE / Wifi MQTT / Offline. Sauvegarde du paramètre en EEPROM.
+- Ecran de paramétrage de la connection Wifi et Broker MQTT. Page web se connectant au périphérique et permettant la saisie des paramètres réseaux. Sauvegarde des paramètres réseaux en EEPROM.
+
+(*) ***ROMV2*** uniquement
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Modèles
+
+#### Fonctionnalités par modèle
+| Composant / Fonction | ROMV2 | SQMLite |
+| --- | :---: | :---: |
+| TSL2591 — Luminosité / SQM / Bortle | ✅ | ✅ |
+| BME280 — Environnement / point de rosée | ✅ | ✅ |
+| TFT ST7735 — Affichage | ✅ | ✅ |
+| MLX90614 — État du ciel (IR) | ✅ | ❌ |
+| ADXL345 — Niveau à bulle | ✅ | ❌ |
+| GPS NEO 8M — Coordonnées / UTC | ✅ | ❌ |
+| Connexion BLE + Driver ASCOM | ✅ | ✅ |
+| WiFi / MQTT | ✅ | ✅ |
+
+#### Écrans disponibles
+| Écran | ROMV2 | SQMLite |
+| --- | :---: | :---: |
+| Accueil | ✅ | ✅ |
+| Luminosité | ✅ | ✅ |
+| Environnement | ✅ | ✅ |
+| Ir Température | ✅ | ❌ |
+| Niveaux | ✅ | ❌ |
+| GPS | ✅ | ❌ |
+| Sélection de la connection réseau | ✅ | ✅ |
+| Paramétrage du Wifi MQTT | ✅ | ✅ |
+| Calibration du capteur de luminosité TSL 2591 | ✅ | ✅ |
+
+> [!TIP]
+> Le choix du modèle se fait simplement en ouvrant le bon exemple dans l'Arduino IDE (***Fichier*** -> ***Exemples*** -> ***ROMV2*** -> ***ROMV2*** ou ***SQMLite***). La même bibliothèque et la même configuration `ROMV2_APP_CONFIG.h` servent les deux.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -93,7 +151,8 @@ Voici l'échelle de Bortle utilisée dans l'application.
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ## Liste des pièces
-### Amazon
+### Liste des pièces du ROMV2
+#### Amazon
 
 | Composant | Prix | Nb. pièces | Prix unitaire |
 | --- | --- | --- | --- |
@@ -114,7 +173,7 @@ Voici l'échelle de Bortle utilisée dans l'application.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
-### Ali Express
+#### Ali Express
 | Composant | Prix | Nb. pièces | Prix unitaire |
 | --- | --- | --- | --- |
 | [ESP32 with Battery (Micro USB)](https://fr.aliexpress.com/item/1005007579177706.html) | 4.19 € | 1 | 4.19 € |
@@ -134,7 +193,7 @@ Voici l'échelle de Bortle utilisée dans l'application.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
-### Visserie & Divers
+#### Visserie & Divers
 
 | Composant | Propriétés | Quantité |
 | --- | --- | --- |
@@ -153,30 +212,79 @@ Voici l'échelle de Bortle utilisée dans l'application.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
+### Liste des pièces du SQMLite
+#### Amazon
+
+| Composant | Prix | Nb. pièces | Prix unitaire |
+| --- | --- | --- | --- |
+| ESP32 with Battery (USB-C) | 18.77 € | 1 | 18.77 € |
+| [TSL2591](https://www.amazon.fr/dp/B0GGD3FNKM) | 12.69 € | 1 | 12.69 € |
+| [BME280](https://www.amazon.fr/dp/B07HMQMW6M) | 39.48 € | 5 | 7.90 € |
+| [TFT ST7735](https://www.amazon.fr/AZDelivery-TFT-Compatible-Raspberry-incluant/dp/B07TJGF8HS) | 27.99 € | 5 | 5.60 € |
+| [Lentille D23 F30](https://www.amazon.fr/Lentille-biconvexe-Double-Convexe-Optique/dp/B0GVHDZD22) | 25.94 € | 1 | 25.94 € |
+| [Joystick](https://www.amazon.fr/Gebildet-Joystick-Commande-Contr%C3%B4leur-Raspberry/dp/B0DPMN19G6) | 10.99 € | 8 | 1.37 € |
+| [Boot Button](https://www.amazon.fr/dp/B07S1MNB8C) | 10.99 € | 5 | 2.20 € |
+| [Interrupteur à bascule](https://www.amazon.fr/dp/B076VKRKQQ) | 7.49 € | 5 | 1.50 € |
+| [Rallonge USB-C](https://www.amazon.fr/Cablecc-3-1-type-femelle-donn%C3%A9es-dextension/dp/B075P2FF7L) | 17.56 € | 1 | 17.56 € |
+| [Testeur de capacité](https://www.amazon.fr/dp/B0DKHT664R) | 12.79 € | 4 | 3.20 € |
+| | | Total | **96.73 €** |
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Ali Express
+| Composant | Prix | Nb. pièces | Prix unitaire |
+| --- | --- | --- | --- |
+| [ESP32 with Battery (USB-C)](https://fr.aliexpress.com/item/1005007579177706.html) | 5.09 € | 1 | 5.09 € |
+| [TSL2591](https://fr.aliexpress.com/item/1005009222536594.html) | 3.79 € | 1 | 3.79 € |
+| [BME280](https://fr.aliexpress.com/item/1005010256393146.html) | 4.59 € | 1 | 4.59 € |
+| [TFT ST7735](https://fr.aliexpress.com/item/1005008974306385.html) | 3.29 € | 1 | 3.29 € |
+| [Lentille D23 F30](https://fr.aliexpress.com/item/1005007033633969.html) | 2.33 € | 1 | 2.33 € |
+| [Joystick](https://fr.aliexpress.com/item/1005009009852719.html) | 0.46 € | 1 | 0.46 € |
+| [Boot Button](https://fr.aliexpress.com/item/1005007876916629.html) | 26.19 € | 20 | 1.31 € |
+| [Interrupteur à bascule](https://fr.aliexpress.com/item/1005010311259797.html) | 1.79 € | 10 | 0.18 € |
+| [Rallonge USB-C 0.2m](https://fr.aliexpress.com/item/1005005292730047.html) | 1.71 € | 1 | 1.71 € |
+| [Testeur de capacité](https://fr.aliexpress.com/item/1005006350742151.html) | 1.45 € | 1 | 1.45 € |
+| | | Total | **24.20 €** |
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Visserie & Divers
+| Composant | Propriétés | Quantité |
+| --- | --- | --- |
+| Vis & rondelles | M4 x 20mm | 8 |
+| Vis & rondelles | M2 x 20mm | 4 |
+| Vis & rondelles | M2 x 8mm | 21 |
+| Vis & rondelles | M2 x 6mm | 8 |
+| Ecrou Nylstop autobloquants | M2 | 7 |
+| [PCB EPLZON](https://www.amazon.fr/dp/B0B5DCHM7K) | ... | 1 |
+| [Câbles Dupont](https://www.amazon.fr/Breadboard-Jumper-Wires-Dupont-Cable/dp/B0BTT48V7P) | ... | ... |
+| [PCB Vis Connecteur](https://www.amazon.fr/dp/B082ZNRQMJ?th=1) | ... | ... |
+| [Jumper Breadboard](https://www.amazon.fr/dp/B0F6LJS4L2?ref=ppx_yo2ov_dt_b_fed_asin_title) | ... | ... |
+| [Pile Rechargeable 18650](https://bestpiles.fr/piles-rechargeables-18650/991-pile-rechargeable-18650-inr18650mj1-li-ion-37v-3500mah-10a-8438493099829.html) | Li-ion 3,7V 3500mAh 10A | 1 |
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
 ## Montage
+
+### Montage du ROMV2
 
 ![Montage](screenshots/Montage.jpg)
 ![Montage](screenshots/Montage_2.jpg)
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
-### Breadboard
+#### Breadboard
 ![Breadboard](screenshots/ROMV2_Fritzing_1.png)
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
-### PCB
+#### PCB
 ![PCB](screenshots/ROMV2_Fritzing_2.png)
 ![PCB](screenshots/PCB.jpg)
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
-### Boxes
-Vous trouverez dans [ce dossier](./Boxes/) tous les fichiers STL nécessaires à l'impression 3D.
-
-<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
-
-### ESP32
+#### ESP32
 Des branchements direct sur l'ESP32 sont nécessaires :
 - 2 câbles Dupont branchés directement sur l'interrupteur de l'ESP et connectés à l'interrupteur du ROM.
 - 2 câbles branchés sur les pôles + et - de l'ESP et connectés à l'indicateur de charge restante de la batterie.
@@ -188,13 +296,54 @@ Des branchements direct sur l'ESP32 sont nécessaires :
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
-### Capteurs
+#### Capteurs
 ![Capteurs](screenshots/Capteur_1.jpg)
 ![Capteurs](screenshots/Capteur_2.jpg)
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
-#### Optique du TSL2591
+### Montage du SQMLite
+![Montage](screenshots/SQMLite_Montage_1.jpg)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Breadboard
+![Breadboard](screenshots/SQMLite_breadboard_1.png)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### PCB
+![PCB](screenshots/SQMLite_pcb_1.png)
+![PCB](screenshots/SQMLite_pcb_2.jpg)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### ESP32
+Des branchements direct sur l'ESP32 sont nécessaires :
+- 2 câbles Dupont branchés directement sur l'interrupteur de l'ESP et connectés à l'interrupteur du **SQM Lite**.
+- 2 câbles branchés sur les pôles + et - de l'ESP et connectés à l'indicateur de charge restante de la batterie.
+
+![ESP32](screenshots/SQMLite_ESP32.jpg)
+
+> [!WARNING]
+> Attention, le connecteur **USB-C** présent sur l'ESP est **très très fragile** (j'en ai personnellement cassé plusieurs sur d'autres projets en faisant des branchements). Je vous conseil donc de rajouter 2 points de soudure de part et d'autre du connecteur  afin d'augmenter sa solidité.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### Capteurs
+![Capteurs](screenshots/SQMLite_Capteurs_1.jpg)
+![Capteurs](screenshots/SQMLite_Capteurs_2.jpg)
+![Capteurs](screenshots/SQMLite_Capteurs_3.jpg)
+![Capteurs](screenshots/SQMLite_Capteurs_4.jpg)
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Boxes
+Vous trouverez dans [ce dossier](./Boxes/) tous les fichiers STL nécessaires à l'impression 3D.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Optique du TSL2591
 ![TSL2591](screenshots/Optique_tsl2591_1.jpg)
 ![TSL2591](screenshots/Optique_tsl2591_2.jpg)
 ![TSL2591](screenshots/Optique_tsl2591_3.jpg)
@@ -265,9 +414,13 @@ Vous devez modifier 2 paramètres :
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
 ### Implémentation
-Pour démarrer un nouveau projet ROMV2, il vous suffit d'aller dans les examples de votre Arduino IDE, et de sélectionner **ROMV2**.
+Pour démarrer un nouveau projet **ROMV2**, il vous suffit d'aller dans les examples de votre Arduino IDE, et de sélectionner ***ROMV2*** -> ***ROMV2***.
 
 ![ROMV2 Application example](screenshots/ROMV2_ino.png)
+
+Pour démarrer un nouveau projet **SQMLite**, il vous suffit d'aller dans les examples de votre Arduino IDE, et de sélectionner ***ROMV2*** -> ***SQMLite***.
+
+![SQMLite Application example](screenshots/SQMLite_ino.png)
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 
@@ -293,39 +446,46 @@ En activant le mode **Debug**, vous pourrez voir les traces de l'application dan
 
 ## Utilisation
 
-### Matériel
+### Matériel (ROMV2)
 ![ROMV2 Logs](screenshots/ROMV2_Bottom.jpg)
 
-Vous trouverez au bas du ROM V2 :
+Vous trouverez au bas du ***ROMV2*** :
 - l'interrupteur On/Off de l'appareil.
-- 1 connecteur **Micro USB** permettant de recharger le ROM V2 et servant également à la mise à jour du firmware.
+- 1 connecteur **Micro USB** permettant de recharger le ***ROMV2*** et servant également à la mise à jour du firmware.
 - 1 interrupteur (bouton poussoir) permettant de mettre l'ESP en mode Boot lors de la mise à jour du firmware.
 - L'indicateur de charge restante dans la batterie. Appuyez sur le bouton **"TEST"** de l'indicateur pour connaître la charge restante.
 
-Le pilotage du ROM V2 s'effectue via le joystick :
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Matériel (SQMLite)
+![SQMLite Bottom](screenshots/SQMLite_Bottom.jpg)
+![SQMLite Right](screenshots/SQMLite_Right.jpg)
+
+Vous trouverez au bas du ***SQMLite*** :
+- 1 connecteur **USB-C** permettant de recharger le ***SQMLite*** et servant également à la mise à jour du firmware.
+- 1 interrupteur (bouton poussoir) permettant de mettre l'ESP en mode Boot lors de la mise à jour du firmware.
+
+Vous trouverez sur le côté droit du ***SQMLite*** :
+- l'interrupteur On/Off de l'appareil.
+- L'indicateur de charge restante dans la batterie. Appuyez sur le bouton **"TEST"** de l'indicateur pour connaître la charge restante.
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+### Navigation
+
+Le pilotage du ***ROMV2*** et du ***SQMLite*** s'effectue via le joystick :
 - Droite et gauche permettent de naviguer parmis les différents écrans.
 - Haut et Bas permettent un retour direct à l'écran d'accueil.
 - Sur l'écran d'acceuil, un clic sur le joystick permet d'alterner l'affichage Lux et SQM.
 - Sur l'écran de luminosité, un clic sur le joystick permet de réinitialiser la moyenne mobile en cours.
 - Un clic long sur le joystick permet de basculer l'écran en mode veille.
-
-<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
-
-### Calibration
-
-Dans le fichier de configuration, vous trouverez une constante définie permettant de calibrer le ROM V2 dans sa lecture de luminosité via le TSL2591.
-La constante de calibration est : `TSL2591_CALIBRATION`
-
-![Calibration](screenshots/Calibration.png)
-
-> [!TIP]
-> La calibration nécessaire avec la lentille donne par le calcul une valeure de 1.121, mais dans la pratique, la valeure de 0 donne des résultats plus cohérents. Vous pouvez également donner des valeurs négatives si nécessaire.
-
-<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+- Sur l'écran de sélection du réseau, Haut et Bas permettent de modifier le nouveau réseau sélectionné, et un clic sur le joystick permet de sauvegarder la nouvelle valeure du paramètre.
+- Sur l'écran de paramétrage du réseau Wifi, un clic sur le joystick permet de passer l'ESP en mode AP (Access Point) ou STA (Station) et inversement. 
+- Sur l'écran de calibration du TSL2591, Haut et Bas permettent de modifier la nouvelle valeure de calibration, et un clic sur le joystick permet de sauvegarder la nouvelle valeure du paramètre.
 
 ### Mise en veille
 
-L'écran du ROM V2 s'éteint automatiquement après 5 min d'inactivité (modifiable dans le fichier de configuration).
+L'écran du ***ROMV2*** / ***SQMLite*** s'éteint automatiquement après 5 min d'inactivité (modifiable dans le fichier de configuration).
 Cette mise en veille peut être déclenchée à tout moment par un "click long" sur le joystick.
 
 Pour sortir du mode veille, il suffit d'effectuer une action sur le joystick, peu importe laquelle.
@@ -334,9 +494,9 @@ Pour sortir du mode veille, il suffit d'effectuer une action sur le joystick, pe
 
 ### Logiciel
 
-Le firmware est constitué de 7 écrans, avec un en-tête commun à tous les écrans.
+Le firmware est constitué de plusieurs écrans, avec un en-tête commun à tous les écrans.
 
-#### En-tête
+#### En-tête (ROMV2)
 
 ![Header](screenshots/Header.png)
 
@@ -344,8 +504,38 @@ L'en-tête comprend les éléments suivants :
 - Un icone principal spécifique à l'écran en cours d'affichage.
 - La date et l'heure UTC remontée par le capteur GPS.
 - Un icone indiquant qu'une prise de mesure de la luminosité est en cours.
-- Un icone indiquant la présence d'une connexion client via Blutooth (2 états : rouge et vert).
+- Un icone d'état de la connexion en cours. Trois types d'icone selon la connexion :
+    - Icone ***Offline***.
+    - Icone ***Bluetooth***. Deux états pour cet icone :
+        - Rouge : Aucun client Bluetooth BLE connecté.
+        - Vert : Un client BLE est actuellement connecté.
+    - Icone ***Wifi***. Quatre état pour cet icone :
+        - Rouge : Wifi non connecté.
+        - Orange : Connexion en cours OU ESP en mode AP (Access Point).
+        - Bleu : Wifi connecté en mode STA (Station) mais aucune connexion avec un Broker MQTT (exple : Mosquito).
+        - Vert : Wifi connecté en mode STA (Station) et connexion avec un Broker MQTT effectuée.
 - Un icone indiquant si le GPS est "fixé", remontant ainsi les informations de localisation (2 états : rouge et vert). Est également précisé le nombre de satellites à partir desquels le capteur récupère les informations. 
+
+<p align="right"><a href="#sommaire">Retour au sommaire</a></p>
+
+#### En-tête (SQMLite)
+
+![Header](screenshots/Firmware_Header.png)
+
+L'en-tête comprend les éléments suivants :
+- Un icone principal spécifique à l'écran en cours d'affichage.
+- Le titre de l'application.
+- Un icone indiquant qu'une prise de mesure de la luminosité est en cours.
+- Un icone d'état de la connexion en cours. Trois types d'icone selon la connexion :
+    - Icone ***Offline***.
+    - Icone ***Bluetooth***. Deux états pour cet icone :
+        - Rouge : Aucun client Bluetooth BLE connecté.
+        - Vert : Un client BLE est actuellement connecté.
+    - Icone ***Wifi***. Quatre état pour cet icone :
+        - Rouge : Wifi non connecté.
+        - Orange : Connexion en cours OU ESP en mode AP (Access Point).
+        - Bleu : Wifi connecté en mode STA (Station) mais aucune connexion avec un Broker MQTT (exple : Mosquito).
+        - Vert : Wifi connecté en mode STA (Station) et connexion avec un Broker MQTT effectuée.
 
 <p align="right"><a href="#sommaire">Retour au sommaire</a></p>
 

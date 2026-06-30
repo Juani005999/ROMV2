@@ -13,7 +13,7 @@ ROMV2_TSL2591::ROMV2_TSL2591()
 /// <param name="tft"></param>
 /// <param name="dataLuminosity"></param>
 /// <param name="dataEnvironment"></param>
-void ROMV2_TSL2591::Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity, DataSensorEnvironment* dataEnvironment)
+void ROMV2_TSL2591::Init(ROMV2_TFT_COMMON* tft, DataSensorLuminosity* dataLuminosity, DataSensorEnvironment* dataEnvironment)
 {
     // Valorisation des membres internes
     _tft = tft;
@@ -38,7 +38,7 @@ void ROMV2_TSL2591::Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity, D
 }
 
 /// <summary>
-/// Démarre la tâche FreeRTOS sur le cœur 1
+/// Démarre la tâche FreeRTOS sur le coeur 0
 /// </summary>
 void ROMV2_TSL2591::StartTask()
 {
@@ -53,7 +53,7 @@ void ROMV2_TSL2591::StartTask()
         this,           // Passage du pointeur this pour accéder aux membres
         1,              // Priorité
         NULL,           // Handle (non utilisé)
-        1               // Cœur 1 → laisse le cœur 0 libre pour l'UI
+        0               // Coeur 0 -> laisse le coeur 1 libre pour l'UI
     );
 
     // Trace
@@ -70,50 +70,84 @@ void ROMV2_TSL2591::TaskWrapper(void* pvParameters)
 }
 
 /// <summary>
-/// Boucle de la tâche FreeRTOS — tourne en continu sur le cœur 1
+/// Boucle de la tâche FreeRTOS — tourne en continu sur le coeur 0
 /// </summary>
 void ROMV2_TSL2591::TaskLoop()
 {
     while (true)
     {
+        // Lecture suspendue (ex. écran niveau à bulle) : on ne touche PAS au bus I2C,
+        // on se contente de re-tester le drapeau périodiquement.
+        if (_readingPaused)
+        {
+            _luminosityIconOn = false;
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
+        }
+
         // Lecture des données brutes du capteur
         _luminosityIconOn = true;
-        uint32_t lum = _tsl2591.getFullLuminosity();
-        uint16_t ir = lum >> 16;
-        uint16_t full = lum & 0xFFFF;
-        uint16_t visible = full - ir;
-        float    lux = _tsl2591.calculateLux(full, ir);
 
-        // Ecriture des données sous mutex
-        if (xSemaphoreTake(_mutex, pdMS_TO_TICKS(50)) == pdTRUE)
+        // Lecture des données sous mutex I2C
+        uint32_t lum = 0;
+        bool luxRead = false;
         {
-            _lastIrRead = ir;
-            _lastFullRead = full;
-            _lastVisibleRead = visible;
-            _lastLuxRead = lux;
-            _newDataReady = true;
+            // Timeout généreux : le TSL ne lit que toutes les 2 s, il peut attendre le bus
+            I2CLock lock(pdMS_TO_TICKS(300));
+            if (lock.ok())
+            {
+                lum = _tsl2591.getFullLuminosity();
+                luxRead = true;
+            }
+        }   // verrou I2C rendu ICI
 
-            // On libère le mutex
-            xSemaphoreGive(_mutex);
+        // Si le bus était occupé, on saute ce cycle (les dernières valeurs sont conservées)
+        if (luxRead)
+        {
+            uint16_t ir = lum >> 16;
+            uint16_t full = lum & 0xFFFF;
+            uint16_t visible = full - ir;
+            float    lux = _tsl2591.calculateLux(full, ir);
+
+            // Ecriture des données sous mutex OBJET (distinct du verrou I2C)
+            if (xSemaphoreTake(_mutex, pdMS_TO_TICKS(50)) == pdTRUE)
+            {
+                _lastIrRead = ir;
+                _lastFullRead = full;
+                _lastVisibleRead = visible;
+                _lastLuxRead = lux;
+                _newDataReady = true;
+
+                // On libère le mutex
+                xSemaphoreGive(_mutex);
+            }
+
+            // Traces
+            debugln(F(""));
+            debugln(F("[LUX] Lecture du TSL2591 dans TaskLoop"));
+            debug(F("[LUX] IR: "));
+            debugln(ir);
+            debug(F("[LUX] Full: "));
+            debugln(full);
+            debug(F("[LUX] Visible: "));
+            debugln(visible);
+            debug(F("[LUX] Lux: "));
+            debugln(lux);
+        }
+        else
+        {
+            // Traces
+            debugln(F(""));
+            debugln(F("[LUX] Lecture du TSL2591 dans TaskLoop"));
+            debugln(F("[LUX] Mutex I2C déjà occupé"));
+            debugln(F("[LUX] Pas de lecture sur ce cycle"));
         }
 
         // On repositionne l'icone de lecture d'état
         _luminosityIconOn = false;
 
-        // Traces
-        debugln(F(""));
-        debugln(F("[LUX] Lecture du TSL2591 dans TaskLoop"));
-        debug(F("[LUX] IR: "));
-        debugln(ir);
-        debug(F("[LUX] Full: "));
-        debugln(full);
-        debug(F("[LUX] Visible: "));
-        debugln(visible);
-        debug(F("[LUX] Lux: "));
-        debugln(lux);
-
         // Libère le CPU pendant le temps d'intégration
-        // => le cœur 0 est entièrement libre pendant cette attente
+        // => le coeur 0 est entièrement libre pendant cette attente
         vTaskDelay(pdMS_TO_TICKS(READ_LUX_INTERVAL));
     }
 }
@@ -126,7 +160,7 @@ void ROMV2_TSL2591::ReadLuminosity()
     // Lecture de luminosité sur intervalle
     if (millis() - _chronoDisplayLux >= DISPLAY_INTERVAL)
     {
-        // Gestion icône — exécuté sur cœur 0, donc TFT safe
+        // Gestion icône — exécuté sur cœur 1, donc TFT safe
         _tft->SetLuminosityIcon(_luminosityIconOn);
 
         // On récupère dans le Thread principal les valeurs lues dans le Thread 1
@@ -719,8 +753,8 @@ void ROMV2_TSL2591::SaveTSL2591Calibration(int value)
     debug(F("[LUX] Début sauvegarde nouvelle calibration : "));
     debugln(value);
 
-    _preferences.begin("config", false);
-    _preferences.putInt("tsl_calib", value);
+    _preferences.begin(PREF_TSL2591_NAMESPACE, false);
+    _preferences.putInt(PREF_TSL2591_KEY_NAME, value);
     _preferences.end();
     _dataLuminosity->tsl2591Calibration = value;
 
@@ -738,11 +772,19 @@ void ROMV2_TSL2591::LoadTSL2591Calibration()
     debugln(F(""));
     debugln(F("[LUX] Début lecture calibration"));
 
-    _preferences.begin("config", true);
-    _dataLuminosity->tsl2591Calibration = _preferences.getInt("tsl_calib", 0);
+    _preferences.begin(PREF_TSL2591_NAMESPACE, true);
+    _dataLuminosity->tsl2591Calibration = _preferences.getInt(PREF_TSL2591_KEY_NAME, 0);
     _preferences.end();
 
     // Trace
     debug(F("[LUX] Fin lecture calibration : "));
     debugln(_dataLuminosity->tsl2591Calibration);
+}
+
+/// <summary>
+/// Suspend ou reprend la lecture de luminosité.
+/// </summary>
+void ROMV2_TSL2591::SetReadingPaused(bool paused)
+{
+    _readingPaused = paused;
 }

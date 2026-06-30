@@ -2,9 +2,9 @@
 ///
 /// Projet                          : ROMV2 - Remote Open Météo Version 2 - Sky Quality Meter DIY
 /// Auteur                          : Juanito del Pepito
-/// Version                         : 2.0.3.1
+/// Version                         : 2.1.0.1
 /// Date                            : 10/04/2026
-/// Date Révision                   : 27/05/2026
+/// Date Révision                   : 27/06/2026
 /// 
 /// Description                     : Sky Quality Meter (SQM)
 /// Gitub                           : https://github.com/Juani005999/ROMV2

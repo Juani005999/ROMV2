@@ -15,13 +15,15 @@ ROMV2_DISPLAY_HOME::ROMV2_DISPLAY_HOME()
 /// <param name="dataLuminosity"></param>
 /// <param name="dataSkyState"></param>
 /// <param name="dataGPS"></param>
-void ROMV2_DISPLAY_HOME::Init(TFT_eSPI* tft,
+void ROMV2_DISPLAY_HOME::Init(APP_TYPE appType,
+	TFT_eSPI* tft,
 	DataSensorEnvironment* dataEnvironment,
 	DataSensorLuminosity* dataLuminosity,
 	DataSensorSkyState* dataSkyState,
 	DataSensorGPS* dataGPS)
 {
 	// Initialisation des objets internes
+	_appType = appType;
 	_tft = tft;
 	_dataEnvironment = dataEnvironment;
 	_dataLuminosity = dataLuminosity;
@@ -61,12 +63,22 @@ void ROMV2_DISPLAY_HOME::UpdateDisplay()
 	ClearDisplay();
 
 	// Affichage des données
-	DisplayCoordinates();
 	DisplayTemperature();
 	DisplayLux();
 	DisplayDewPoint();
 	DisplayBortle();
-	DisplaySkyState();
+	switch (_appType)
+	{
+		case APP_SQMLITE:
+			DisplaySensorValues();
+			break;
+
+		case APP_ROMV2:
+		default:
+			DisplayCoordinates();
+			DisplaySkyState();
+			break;
+	}
 
 	// Reset de la mise à jour complète de l'affichage
 	_forceRedraw = false;
@@ -296,23 +308,25 @@ void ROMV2_DISPLAY_HOME::DisplayDewPoint()
 	{
 		// Icone du Point de Rosée
 		_tft->setSwapBytes(true);
+		int x = _appType == APP_SQMLITE ? 70 : 38;
+		int y = _appType == APP_SQMLITE ? 35 : 58;
 		switch (_dataEnvironment->dewPointState)
 		{
 		case DEWPOINT_STATE_DRY:
-			_tft->pushImage(38, 58, 20, 20, icon_goutte_blue_lightgrey);
+			_tft->pushImage(x, y, 20, 20, icon_goutte_blue_lightgrey);
 			break;
 
 		case DEWPOINT_STATE_HUMID:
-			_tft->pushImage(38, 58, 20, 20, icon_goutte_orange_lightgrey);
+			_tft->pushImage(x, y, 20, 20, icon_goutte_orange_lightgrey);
 			break;
 
 		case DEWPOINT_STATE_WET:
-			_tft->pushImage(38, 58, 20, 20, icon_goutte_red_lightgrey);
+			_tft->pushImage(x, y, 20, 20, icon_goutte_red_lightgrey);
 			break;
 
 		case DEWPOINT_STATE_UNKNOWN:
 		default:
-			_tft->drawRect(38, 58, 20, 20, TFT_LIGHTGREY);
+			_tft->drawRect(x, y, 20, 20, TFT_LIGHTGREY);
 			break;
 		}
 	}
@@ -323,7 +337,9 @@ void ROMV2_DISPLAY_HOME::DisplayDewPoint()
 	// Affichage des données
 	_tft->setTextSize(1);
 	_tft->setTextColor(TFT_DARKGREY, TFT_LIGHTGREY);
-	_tft->setCursor(58, 65);
+	int x = _appType == APP_SQMLITE ? 95 : 58;
+	int y = _appType == APP_SQMLITE ? 42 : 65;
+	_tft->setCursor(x, y);
 	char stringBuffer[12];
 	if (!isnan(_dataEnvironment->dewPoint))
 	{
@@ -352,13 +368,17 @@ void ROMV2_DISPLAY_HOME::DisplayBortle()
 	if (_forceRedraw)
 	{
 		_tft->setSwapBytes(true);
-		_tft->pushImage(111, 58, 20, 20, icon_star_yellow_lightgrey);
+		int x = _appType == APP_SQMLITE ? 10 : 111;
+		int y = _appType == APP_SQMLITE ? 35 : 58;
+		_tft->pushImage(x, y, 20, 20, icon_star_yellow_lightgrey);
 	}
 
 	// Affichage des données
 	_tft->setTextSize(1);
 	_tft->setTextColor(TFT_DARKGREY, TFT_LIGHTGREY);
-	_tft->setCursor(136, 65);
+	int x = _appType == APP_SQMLITE ? 35 : 136;
+	int y = _appType == APP_SQMLITE ? 42 : 65;
+	_tft->setCursor(x, y);
 	char stringBuffer[12];
 	if (!isnan(_dataLuminosity->bortle))
 	{
@@ -403,4 +423,39 @@ void ROMV2_DISPLAY_HOME::DisplaySkyState()
 
 	// Mise à jour des flags
 	_skyStateLast = _dataSkyState->skyState;
+}
+
+/// <summary>
+/// Affichage de l'état du capteur TSL2591
+/// </summary>
+void ROMV2_DISPLAY_HOME::DisplaySensorValues()
+{
+	// Mise en forme de l'affichage
+	_tft->setTextWrap(false);
+
+	// Affichage icone sur mise à jour complète de l'affichage
+	if (_forceRedraw)
+	{
+		// Libellés
+		_tft->setTextColor(TFT_BLACK, TFT_LIGHTGREY);
+		_tft->drawRightString(F("Gain:"), 75, 58, 1);
+		_tft->drawRightString(F("Expo.:"), 75, 68, 1);
+
+		// Icone du sensor
+		_tft->setSwapBytes(true);
+		_tft->pushImage(10, 58, 20, 20, icon_sensor_lightgrey);
+	}
+
+	// Affichage des données
+	_tft->setTextSize(1);
+	_tft->setTextColor(TFT_DARKGREY, TFT_LIGHTGREY);
+	char stringBuffer[12];
+
+	// Gain
+	_tft->setCursor(79, 58);
+	_tft->print(_dataLuminosity->luxSensorGain);
+
+	// Timing
+	_tft->setCursor(79, 68);
+	_tft->print(_dataLuminosity->luxSensorTiming);
 }

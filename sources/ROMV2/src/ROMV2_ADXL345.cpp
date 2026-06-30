@@ -148,9 +148,18 @@ void ROMV2_ADXL345::ReadAcceleration()
     // Lecture de luminosité sur intervalle
     if (millis() > _chronoReadAccel + READ_ACCEL_INTERVAL)
     {
-        // Récupère un event sur l'objet ADXL345 
-        sensors_event_t event; 
-        _adxl345.getEvent(&event);
+        // Chrono repositionné dès maintenant (lecture OU saut si bus I2C occupé)
+        _chronoReadAccel = millis();
+
+        // Récupère un event sur l'objet ADXL345 — accès I2C protégé
+        sensors_event_t event;
+        {
+            I2CLock lock(pdMS_TO_TICKS(10));
+            if (!lock.ok())
+                return;     // bus occupé -> on saute ce cycle, valeurs précédentes conservées
+
+            _adxl345.getEvent(&event);
+        }   // verrou rendu ici
   
         // On lit les accélérations (!! ATTENTION !! Dans le boitier, les X et Y sont inversés)
         _dataAcceleration->x = event.acceleration.y * -1.0;
@@ -162,8 +171,5 @@ void ROMV2_ADXL345::ReadAcceleration()
         debug(F("[ACCEL] X: ")); debug(_dataAcceleration->x); debugln(F(" m/s^2 "));
         debug(F("[ACCEL] Y: ")); debug(_dataAcceleration->y); debugln(F(" m/s^2 "));
         debug(F("[ACCEL] Z: ")); debug(_dataAcceleration->z); debugln(F(" m/s^2 "));
-
-        // Actualisation flag et compteurs
-        _chronoReadAccel = millis();
     }
 }

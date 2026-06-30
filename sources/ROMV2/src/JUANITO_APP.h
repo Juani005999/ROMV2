@@ -14,7 +14,7 @@
 #include "Arduino.h"
 
 // Mode développement. Mettre en commentaire à la fin des développements
-//#define DEBUG
+#define DEBUG
 
 // Define nécessaires au mode Debug
 #ifdef DEBUG

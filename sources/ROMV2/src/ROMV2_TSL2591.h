@@ -1,6 +1,6 @@
 // Include des librairies
 #include <ROMV2_APP_CONFIG.h>
-#include <ROMV2_TFT.h>
+#include <ROMV2_TFT_COMMON.h>
 
 /// <summary>
 /// Objet ROMV2_TSL2591 : Objet applicatif permettant le pilotage du capteur TSL2591
@@ -19,7 +19,7 @@ class ROMV2_TSL2591
     /// <param name="tft"></param>
     /// <param name="dataLuminosity"></param>
     /// <param name="dataEnvironment"></param>
-    void Init(ROMV2_TFT* tft, DataSensorLuminosity* dataLuminosity, DataSensorEnvironment* dataEnvironment);
+    void Init(ROMV2_TFT_COMMON* tft, DataSensorLuminosity* dataLuminosity, DataSensorEnvironment* dataEnvironment);
 
     /// <summary>
     /// Lecture de la luminosité
@@ -48,6 +48,13 @@ class ROMV2_TSL2591
     /// <returns></returns>
     void LoadTSL2591Calibration();
 
+    /// <summary>
+    /// Suspend ou reprend la lecture de luminosité. Utilisé pour libérer le bus I2C
+    /// à l'ADXL345 sur l'écran niveau à bulle.
+    /// </summary>
+    /// <param name="paused"></param>
+    void SetReadingPaused(bool paused);
+
   private:
     // Fonctions
     void DisplaySensorDetails();
@@ -70,8 +77,8 @@ class ROMV2_TSL2591
     float CorrectThermal(float lux);
 
     // Instanciation des objets internes
-    Adafruit_TSL2591 _tsl2591 = Adafruit_TSL2591(TSL2591_NUMBER_ID);      // TSL2591 : Capteur de luminosité
-    ROMV2_TFT* _tft;
+    Adafruit_TSL2591    _tsl2591 = Adafruit_TSL2591(TSL2591_NUMBER_ID);      // TSL2591 : Capteur de luminosité
+    ROMV2_TFT_COMMON*   _tft;
     Preferences _preferences;
 
     // Membres internes
@@ -94,6 +101,7 @@ class ROMV2_TSL2591
     float _localVisible = NAN;
     float _localLux = NAN;
     volatile bool _luminosityIconOn = false;
+    volatile bool _readingPaused = false;
 
     // Chronos
     unsigned long _chronoDisplayLux;                                                  // Chrono pour lecture de la luminosité

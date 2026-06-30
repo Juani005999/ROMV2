@@ -10,17 +10,32 @@ ROMV2_DISPLAY_HEADER::ROMV2_DISPLAY_HEADER()
 /// <summary>
 /// Initialisation
 /// </summary>
+/// <param name="appType"></param>
 /// <param name="tft"></param>
 /// <param name="dataEnvironment"></param>
 /// <param name="dataGPS"></param>
+/// <param name="dataWifi"></param>
+/// <param name="dataMqtt"></param>
 /// <param name="bluetoothConnected"></param>
-void ROMV2_DISPLAY_HEADER::Init(TFT_eSPI* tft, DataSensorEnvironment* dataEnvironment, DataSensorGPS* dataGPS, bool* bluetoothConnected)
+/// <param name="networkMode"></param>
+void ROMV2_DISPLAY_HEADER::Init(APP_TYPE appType,
+	TFT_eSPI* tft,
+	DataSensorEnvironment* dataEnvironment,
+	DataSensorGPS* dataGPS,
+	DataWifi* dataWifi,
+	DataMqtt* dataMqtt,
+	bool* bluetoothConnected,
+	NETWORK_MODE* networkMode)
 {
 	// Valorisation des objets internes
+	_appType = appType;
 	_tft = tft;
 	_dataEnvironment = dataEnvironment;
 	_dataGPS = dataGPS;
+	_dataWifi = dataWifi;
+	_dataMqtt = dataMqtt;
 	_bluetoothConnected = bluetoothConnected;
+	_networkMode = networkMode;
 }
 
 /// <summary>
@@ -53,9 +68,19 @@ void ROMV2_DISPLAY_HEADER::UpdateDisplay()
 
 	// Affichage des données
 	DisplayMainIcon();
-	DisplayDate();
-	DisplayGPSIcon();
-	DisplayBluetoothIcon();
+	switch (_appType)
+	{
+		case APP_SQMLITE:
+			DisplayTitle();
+			break;
+
+		case APP_ROMV2:
+		default:
+			DisplayDate();
+			DisplayGPSIcon();
+			break;
+	}
+	DisplayNetworkIcon();
 
 	// Reset de la mise à jour complète de l'affichage
 	_forceRedraw = false;
@@ -73,8 +98,29 @@ void ROMV2_DISPLAY_HEADER::ClearDisplay()
 		_tft->drawRect(0, 0, SCREEN_WIDTH, SCREEN_HDR_HEIGHT, TFT_SILVER);
 
 		// Contour de l'icone de luminosité
-		_tft->drawCircle(102, 16, 8, TFT_MAROON);
+		_tft->drawCircle(_appType == APP_SQMLITE ? 123 : 102, 16, 8, TFT_MAROON);
 		SetLuminosityIcon(lastLuminosityIconState);
+	}
+}
+
+/// <summary>
+/// Affichage le titre de l'application
+/// </summary>
+void ROMV2_DISPLAY_HEADER::DisplayTitle()
+{
+	if (_forceRedraw)
+	{
+		// Mise en forme de l'affichage
+		_tft->setTextColor(TFT_BLACK, TFT_WHITE);
+		_tft->setTextSize(1);
+		_tft->setTextFont(TFT_FONT_TITLE);
+
+		// Affichage du titre
+		_tft->setCursor(40, 8);
+		_tft->print(F("SQM Lite"));
+
+		// On repositionne la Font initiale
+		_tft->setTextFont(TFT_FONT_DEFAULT);
 	}
 }
 
@@ -160,6 +206,14 @@ void ROMV2_DISPLAY_HEADER::DisplayMainIcon()
 			_tft->pushImage(5, 5, 20, 20, icon_gps);
 			break;
 
+		case DISPLAY_NETWORK:
+			_tft->pushImage(5, 5, 20, 20, icon_network);
+			break;
+
+		case DISPLAY_WIFI:
+			_tft->pushImage(5, 5, 20, 20, icon_wifi);
+			break;
+
 		case DISPLAY_TSL2591_CALIBRATION:
 			_tft->pushImage(5, 5, 20, 20, icon_settings);
 			break;
@@ -187,11 +241,11 @@ void ROMV2_DISPLAY_HEADER::DisplayGPSIcon()
 		_tft->setSwapBytes(true);
 		if (_dataGPS->gpsFix)
 		{
-			_tft->pushImage(129, 7, 16, 16, icon_gps_green);
+			_tft->pushImage(132, 7, 16, 16, icon_gps_green);
 		}
 		else
 		{
-			_tft->pushImage(129, 7, 16, 16, icon_gps_red);
+			_tft->pushImage(132, 7, 16, 16, icon_gps_red);
 		}
 	}
 	_iconGPSLastState = iconState;
@@ -207,8 +261,30 @@ void ROMV2_DISPLAY_HEADER::DisplayGPSIcon()
 	}
 
 	// Nombre de satellites
-	_tft->setCursor(144, 16);
+	_tft->setCursor(147, 16);
 	_tft->print(_dataGPS->gpsSatellites);
+}
+
+/// <summary>
+/// Affichage de l'icone réseau
+/// </summary>
+void ROMV2_DISPLAY_HEADER::DisplayNetworkIcon()
+{
+	switch (*_networkMode)
+	{
+		case NETWORK_BLE:
+			DisplayBluetoothIcon();
+			break;
+
+		case NETWORK_WIFI:
+			DisplayWifiIcon();
+			break;
+
+		case NETWORK_NONE:
+		default:
+			DisplayOfflineIcon();
+			break;
+	}
 }
 
 /// <summary>
@@ -223,7 +299,7 @@ void ROMV2_DISPLAY_HEADER::DisplayBluetoothIcon()
 		|| iconState != _iconBluetoothLastState)
 	{
 		_tft->setSwapBytes(true);
-		_tft->pushImage(112, 8, 16, 16, *_bluetoothConnected ? icon_bluetooth_green : icon_bluetooth_red);
+		_tft->pushImage(_appType == APP_SQMLITE ? 137 : 113, 8, 16, 16, *_bluetoothConnected ? icon_bluetooth_green : icon_bluetooth_red);
 	}
 	_iconBluetoothLastState = iconState;
 }
@@ -236,9 +312,61 @@ void ROMV2_DISPLAY_HEADER::SetLuminosityIcon(bool on)
 {
 	if (!firstLuminosityIcon && _currentDisplayScreenType != DISPLAY_NONE)
 	{
-		_tft->drawCircle(102, 16, 8, TFT_MAROON);
-		_tft->fillCircle(102, 16, 6, on ? TFT_ORANGE : TFT_WHITE);
+		_tft->drawCircle(_appType == APP_SQMLITE ? 123 : 102, 16, 8, TFT_MAROON);
+		_tft->fillCircle(_appType == APP_SQMLITE ? 123 : 102, 16, 6, on ? TFT_ORANGE : TFT_WHITE);
 	}
 	lastLuminosityIconState = on;
 	firstLuminosityIcon = false;
+}
+
+/// <summary>
+/// Affichage de l'icone Wifi
+/// </summary>
+void ROMV2_DISPLAY_HEADER::DisplayWifiIcon()
+{
+	// On vérifie l'état de l'icone a afficher
+	if (_forceRedraw
+		|| _dataWifi->wifiState != lastWifiState
+		|| _dataWifi->connected != lastWifiConnectedState
+		|| _dataMqtt->connected != lastMqttConnectedState)
+	{
+		_tft->setSwapBytes(true);
+		switch (_dataWifi->wifiState)
+		{
+			case WIFI_STATE_AP:
+				_tft->pushImage(_appType == APP_SQMLITE ? 137 : 113, 8, 16, 16, icon_wifi_orange);
+				break;
+
+			case WIFI_STATE_CONNECTING:
+				_tft->pushImage(_appType == APP_SQMLITE ? 137 : 113, 8, 16, 16, icon_wifi_orange);
+				break;
+
+			case WIFI_STATE_STA:
+			default:
+				if (_dataWifi->connected && _dataMqtt->connected)
+				{
+					_tft->pushImage(_appType == APP_SQMLITE ? 137 : 113, 8, 16, 16, icon_wifi_green);
+				}
+				else
+				{
+					_tft->pushImage(_appType == APP_SQMLITE ? 137 : 113, 8, 16, 16, _dataWifi->connected ? icon_wifi_blue : icon_wifi_red);
+				}
+				break;
+		}
+	}
+	lastWifiState = _dataWifi->wifiState;
+	lastWifiConnectedState = _dataWifi->connected;
+	lastMqttConnectedState = _dataMqtt->connected;
+}
+
+/// <summary>
+/// Affichage de l'icone No Network
+/// </summary>
+void ROMV2_DISPLAY_HEADER::DisplayOfflineIcon()
+{
+	if (_forceRedraw)
+	{
+		_tft->setSwapBytes(true);
+		_tft->pushImage(_appType == APP_SQMLITE ? 137 : 113, 8, 16, 16, icon_network_offline_red_white);
+	}
 }

@@ -1,8 +1,9 @@
 #include <ROMV2_BLE.h>
 
 // Variable globale permettant la gestion de l'état de connexion du BLE
-bool bleDeviceConnected = false;
-bool shouldStartAdvertising = false;
+volatile bool bleDeviceConnected = false;
+volatile bool shouldStartAdvertising = false;
+volatile unsigned long bleDisconnectTime = 0;
 BLEDescriptor _bleCharacteristicTemperatureDescriptor(BLEUUID((uint16_t)0x2901));
 BLEDescriptor _bleCharacteristicHumidityDescriptor(BLEUUID((uint16_t)0x2901));
 BLEDescriptor _bleCharacteristicPressureDescriptor(BLEUUID((uint16_t)0x2901));
@@ -32,6 +33,9 @@ class ROMV2_BLEServiceCallbacks : public BLEServerCallbacks {
         // Positionnement du flag de redémarrage du mode "Advertising" aux clients BLE
         shouldStartAdvertising = true;
 
+        // Horodatage de la déconnexion (pour la relance non bloquante de l'advertising)
+        bleDisconnectTime = millis();
+
         // Trace
         debugln(F(""));
         debugln(F("[BLUETOOTH] Device disconnected"));
@@ -48,17 +52,25 @@ ROMV2_BLE::ROMV2_BLE()
 /// <summary>
 /// Initialisation
 /// </summary>
+/// <param name="appType"></param>
 /// <param name="bluetoothConnected"></param>
 /// <param name="dataEnvironment"></param>
 /// <param name="dataLuminosity"></param>
 /// <param name="dataSkyState"></param>
-void ROMV2_BLE::Init(bool* bluetoothConnected, DataSensorEnvironment* dataEnvironment, DataSensorLuminosity* dataLuminosity, DataSensorSkyState* dataSkyState)
+void ROMV2_BLE::Init(APP_TYPE appType,
+    bool* bluetoothConnected,
+    DataSensorEnvironment* dataEnvironment,
+    DataSensorLuminosity* dataLuminosity,
+    DataSensorSkyState* dataSkyState)
 {
     // Valorisation des champs internes
+    _appType = appType;
     _bluetoothConnected = bluetoothConnected;
     _dataEnvironment = dataEnvironment;
     _dataLuminosity = dataLuminosity;
     _dataSkyState = dataSkyState;
+    _deviceName = _appType == APP_SQMLITE ? BLE_SQMLITE_DEVICE_NAME : BLE_ROMV2_DEVICE_NAME;
+    _deviceUUID = _appType == APP_SQMLITE ? BLE_SQMLITE_SERVICE_UUID : BLE_ROMV2_SERVICE_UUID;
 
     // Trace
     debugln(F(""));
@@ -68,49 +80,58 @@ void ROMV2_BLE::Init(bool* bluetoothConnected, DataSensorEnvironment* dataEnviro
     BLEDevice::init(_deviceName);
     _bleServer = BLEDevice::createServer();
     _bleServer->setCallbacks(new ROMV2_BLEServiceCallbacks());
-    _bleService = _bleServer->createService(BLEUUID(BLE_SERVICE_UUID), BLE_CHARACTERISTIC_NUMHANDLES_COUNT);
+    _bleService = _bleServer->createService(BLEUUID(_deviceUUID), BLE_CHARACTERISTIC_NUMHANDLES_COUNT);
 
     // Création des caractéristiques BLE
     
     // Température : Temperature
-    _bleCharacteristicTemperature = _bleService->createCharacteristic(BLE_CHARACTERISTIC_UUID_TEMPERATURE, BLECharacteristic::PROPERTY_NOTIFY);
+    _bleCharacteristicTemperature = _bleService->createCharacteristic(_appType == APP_SQMLITE ?
+        BLE_SQMLITE_CHARACTERISTIC_UUID_TEMPERATURE : BLE_ROMV2_CHARACTERISTIC_UUID_TEMPERATURE, BLECharacteristic::PROPERTY_NOTIFY);
     _bleCharacteristicTemperatureDescriptor.setValue("Temperature [Celsius]");
     _bleCharacteristicTemperature->addDescriptor(&_bleCharacteristicTemperatureDescriptor);
 
     // Humidité : Humidity
-    _bleCharacteristicHumidity = _bleService->createCharacteristic(BLE_CHARACTERISTIC_UUID_HUMIDITY, BLECharacteristic::PROPERTY_NOTIFY);
-    _bleCharacteristicHumidityDescriptor.setValue("Humidite [pct]");
+    _bleCharacteristicHumidity = _bleService->createCharacteristic(_appType == APP_SQMLITE ?
+        BLE_SQMLITE_CHARACTERISTIC_UUID_HUMIDITY : BLE_ROMV2_CHARACTERISTIC_UUID_HUMIDITY, BLECharacteristic::PROPERTY_NOTIFY);
+    _bleCharacteristicHumidityDescriptor.setValue("Humidity [pct]");
     _bleCharacteristicHumidity->addDescriptor(&_bleCharacteristicHumidityDescriptor);
 
     // Pression atmosphérique : Pressure
-    _bleCharacteristicPressure = _bleService->createCharacteristic(BLE_CHARACTERISTIC_UUID_PRESSURE, BLECharacteristic::PROPERTY_NOTIFY);
+    _bleCharacteristicPressure = _bleService->createCharacteristic(_appType == APP_SQMLITE ?
+        BLE_SQMLITE_CHARACTERISTIC_UUID_PRESSURE : BLE_ROMV2_CHARACTERISTIC_UUID_PRESSURE, BLECharacteristic::PROPERTY_NOTIFY);
     _bleCharacteristicPressureDescriptor.setValue("Pressure [Pa]");
     _bleCharacteristicPressure->addDescriptor(&_bleCharacteristicPressureDescriptor);
 
     // Point de rosée : DewPoint
-    _bleCharacteristicDewPoint = _bleService->createCharacteristic(BLE_CHARACTERISTIC_UUID_DEWPOINT, BLECharacteristic::PROPERTY_NOTIFY);
+    _bleCharacteristicDewPoint = _bleService->createCharacteristic(_appType == APP_SQMLITE ?
+        BLE_SQMLITE_CHARACTERISTIC_UUID_DEWPOINT : BLE_ROMV2_CHARACTERISTIC_UUID_DEWPOINT, BLECharacteristic::PROPERTY_NOTIFY);
     _bleCharacteristicDewPointDescriptor.setValue("DewPoint [Celsius]");
     _bleCharacteristicDewPoint->addDescriptor(&_bleCharacteristicDewPointDescriptor);
 
-    // Couverture du Ciel : CloudCover
-    _bleCharacteristicCloudCover = _bleService->createCharacteristic(BLE_CHARACTERISTIC_UUID_CLOUDCOVER, BLECharacteristic::PROPERTY_NOTIFY);
-    _bleCharacteristicCloudCoverDescriptor.setValue("CloudCover [pct]");
-    _bleCharacteristicCloudCover->addDescriptor(&_bleCharacteristicCloudCoverDescriptor);
-
     // Luminosité : SkyBrightness
-    _bleCharacteristicSkyBrightness = _bleService->createCharacteristic(BLE_CHARACTERISTIC_UUID_SKYBRIGHTNESS, BLECharacteristic::PROPERTY_NOTIFY);
+    _bleCharacteristicSkyBrightness = _bleService->createCharacteristic(_appType == APP_SQMLITE ?
+        BLE_SQMLITE_CHARACTERISTIC_UUID_SKYBRIGHTNESS : BLE_ROMV2_CHARACTERISTIC_UUID_SKYBRIGHTNESS, BLECharacteristic::PROPERTY_NOTIFY);
     _bleCharacteristicSkyBrightnessDescriptor.setValue("SkyBrightness [lux]");
     _bleCharacteristicSkyBrightness->addDescriptor(&_bleCharacteristicSkyBrightnessDescriptor);
 
     // Qualité du ciel : SkyQuality
-    _bleCharacteristicSkyQuality = _bleService->createCharacteristic(BLE_CHARACTERISTIC_UUID_SKYQUALITY, BLECharacteristic::PROPERTY_NOTIFY);
+    _bleCharacteristicSkyQuality = _bleService->createCharacteristic(_appType == APP_SQMLITE ?
+        BLE_SQMLITE_CHARACTERISTIC_UUID_SKYQUALITY : BLE_ROMV2_CHARACTERISTIC_UUID_SKYQUALITY, BLECharacteristic::PROPERTY_NOTIFY);
     _bleCharacteristicSkyQualityDescriptor.setValue("SkyQuality [Mg/Asec^2]");
     _bleCharacteristicSkyQuality->addDescriptor(&_bleCharacteristicSkyQualityDescriptor);
 
-    // Température du ciel : SkyTemperature
-    _bleCharacteristicSkyTemperature = _bleService->createCharacteristic(BLE_CHARACTERISTIC_UUID_SKYTEMPERATURE, BLECharacteristic::PROPERTY_NOTIFY);
-    _bleCharacteristicSkyTemperatureDescriptor.setValue("SkyTemperature [Celsius]");
-    _bleCharacteristicSkyTemperature->addDescriptor(&_bleCharacteristicSkyTemperatureDescriptor);
+    if (_appType == APP_ROMV2)
+    {
+        // Couverture du Ciel : CloudCover
+        _bleCharacteristicCloudCover = _bleService->createCharacteristic(BLE_ROMV2_CHARACTERISTIC_UUID_CLOUDCOVER, BLECharacteristic::PROPERTY_NOTIFY);
+        _bleCharacteristicCloudCoverDescriptor.setValue("CloudCover [pct]");
+        _bleCharacteristicCloudCover->addDescriptor(&_bleCharacteristicCloudCoverDescriptor);
+
+        // Température du ciel : SkyTemperature
+        _bleCharacteristicSkyTemperature = _bleService->createCharacteristic(BLE_ROMV2_CHARACTERISTIC_UUID_SKYTEMPERATURE, BLECharacteristic::PROPERTY_NOTIFY);
+        _bleCharacteristicSkyTemperatureDescriptor.setValue("SkyTemperature [Celsius]");
+        _bleCharacteristicSkyTemperature->addDescriptor(&_bleCharacteristicSkyTemperatureDescriptor);
+    }
 
     // Démarrage du Service BLE
     _bleService->start();
@@ -119,7 +140,7 @@ void ROMV2_BLE::Init(bool* bluetoothConnected, DataSensorEnvironment* dataEnviro
 
     // Démarrage du mode "Advertising" aux clients BLE
     BLEAdvertising* pAdvertising = BLEDevice::getAdvertising();
-    pAdvertising->addServiceUUID(BLE_SERVICE_UUID);
+    pAdvertising->addServiceUUID(_deviceUUID);
     _bleServer->getAdvertising()->start();
 
     // MAJ des flags
@@ -135,21 +156,24 @@ void ROMV2_BLE::Init(bool* bluetoothConnected, DataSensorEnvironment* dataEnviro
 /// </summary>
 void ROMV2_BLE::Notify()
 {
+    // Relance NON BLOQUANTE de l'advertising après une déconnexion.
+    // Evaluée à chaque passage (hors cadence de notification) pour rester réactive ;
+    // déclenchée BLE_ADVERTISING_RESTART_DELAY ms après la déconnexion pour laisser
+    // la stack BLE se stabiliser, sans figer le loop().
+    if (shouldStartAdvertising && millis() > bleDisconnectTime + BLE_ADVERTISING_RESTART_DELAY)
+    {
+        BLEDevice::startAdvertising();
+        shouldStartAdvertising = false;
+
+        // Trace
+        debugln(F(""));
+        debugln(F("[BLUETOOTH] Started advertising. Waiting a client connection to notify..."));
+    }
+
     if (millis() > _chronoReadBluetoothLE + BLE_NOTIFY_INTERVAL)
     {
-        // Relance l'Advertising après déconnection
-        if (shouldStartAdvertising) {
-            // Petit délai pour laisser le BLE stack se stabiliser
-            delay(500);
-            BLEDevice::startAdvertising();
-            shouldStartAdvertising = false;
-
-            // Trace
-            debugln(F(""));
-            debugln(F("[BLUETOOTH] Started advertising. Waiting a client connection to notify..."));
-        }
         // Si connecté, on lance les notifications
-        else if (bleDeviceConnected)
+        if (bleDeviceConnected)
         {
             debugln(F(""));
             debugln(F("[BLUETOOTH] Starting BLE notifications"));
@@ -182,13 +206,6 @@ void ROMV2_BLE::Notify()
             debug(F("[BLUETOOTH] Notify DewPoint : "));
             debugln(characteristicBuffer);
 
-            // Couverture du ciel
-            sprintf(characteristicBuffer, "%.d", (int)_dataSkyState->cloudCover);
-            _bleCharacteristicCloudCover->setValue(characteristicBuffer);
-            _bleCharacteristicCloudCover->notify();
-            debug(F("[BLUETOOTH] Notify CloudCover : "));
-            debugln(characteristicBuffer);
-
             // Luminosité : SkyBrightness
             sprintf(characteristicBuffer, "%.5f", _dataLuminosity->luxAverage);
             _bleCharacteristicSkyBrightness->setValue(characteristicBuffer);
@@ -203,12 +220,22 @@ void ROMV2_BLE::Notify()
             debug(F("[BLUETOOTH] Notify SkyQuality : "));
             debugln(characteristicBuffer);
 
-            // Température du ciel : SkyTemperature
-            sprintf(characteristicBuffer, "%.2f", _dataSkyState->tempObject);
-            _bleCharacteristicSkyTemperature->setValue(characteristicBuffer);
-            _bleCharacteristicSkyTemperature->notify();
-            debug(F("[BLUETOOTH] Notify SkyTemperature : "));
-            debugln(characteristicBuffer);
+            if (_appType == APP_ROMV2)
+            {
+                // Couverture du ciel
+                sprintf(characteristicBuffer, "%.d", (int)_dataSkyState->cloudCover);
+                _bleCharacteristicCloudCover->setValue(characteristicBuffer);
+                _bleCharacteristicCloudCover->notify();
+                debug(F("[BLUETOOTH] Notify CloudCover : "));
+                debugln(characteristicBuffer);
+
+                // Température du ciel : SkyTemperature
+                sprintf(characteristicBuffer, "%.2f", _dataSkyState->tempObject);
+                _bleCharacteristicSkyTemperature->setValue(characteristicBuffer);
+                _bleCharacteristicSkyTemperature->notify();
+                debug(F("[BLUETOOTH] Notify SkyTemperature : "));
+                debugln(characteristicBuffer);
+            }
         }
 
         // Actualisation flag et compteurs

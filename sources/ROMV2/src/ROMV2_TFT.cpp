@@ -8,66 +8,24 @@ ROMV2_TFT::ROMV2_TFT()
 }
 
 /// <summary>
-/// Initialisation
+/// Initialisation des écrans propres au modèle.
 /// </summary>
-/// <param name="dataEnvironment"></param>
-/// <param name="dataLuminosity"></param>
-/// <param name="dataSkyState"></param>
-/// <param name="dataAcceleration"></param>
-/// <param name="_dataGPS"></param>
-/// <param name="bluetoothConnected"></param>
-void ROMV2_TFT::Init(DataSensorEnvironment* dataEnvironment,
-    DataSensorLuminosity* dataLuminosity,
-    DataSensorSkyState* dataSkyState,
-    DataSensorAcceleration* dataAcceleration,
-    DataSensorGPS* dataGPS,
-    bool* bluetoothConnected)
+void ROMV2_TFT::InitModelDisplays()
 {
-    // Valorisation des champs internes
-    _dataEnvironment = dataEnvironment;
-    _dataLuminosity = dataLuminosity;
-    _dataSkyState = dataSkyState;
-    _dataAcceleration = dataAcceleration;
-    _dataGPS = dataGPS;
-    _bluetoothConnected = bluetoothConnected;
-
-    // Initialisation ecran TFT
-    _tft.init();
-    _tft.fillScreen(TFT_BLACK);
-    _tft.setRotation(1);
-
     // Initialisation des objets d'affichage
-    _displayHeader.Init(&_tft, _dataEnvironment, _dataGPS, _bluetoothConnected);
-    _displayHome.Init(&_tft, _dataEnvironment, _dataLuminosity, _dataSkyState, _dataGPS);
+    _displayHeader.Init(_appType, &_tft, _dataEnvironment, _dataGPS, _dataWifi, _dataMqtt, _bluetoothConnected, _networkMode);
+    _displayHome.Init(_appType, &_tft, _dataEnvironment, _dataLuminosity, _dataSkyState, _dataGPS);
     _displayLux.Init(&_tft, _dataLuminosity);
     _displayEnvironment.Init(&_tft, _dataEnvironment);
     _displayIRTemp.Init(&_tft, _dataSkyState);
     _displayAcceleration.Init(&_tft, _dataAcceleration);
     _displayGPS.Init(&_tft, _dataGPS);
+    _displayNetwork.Init(&_tft, _networkMode);
+    _displayWifi.Init(&_tft, _dataWifi);
     _displayTSL2591Calibration.Init(&_tft, _dataLuminosity);
 
-    // Splash App
-    DisplaySplashApp();
-
-    // Réinitialisation de l'affichage
-    _tft.fillScreen(TFT_BLACK);
-    _tft.setCursor(0, 0);
-    _tft.setTextColor(TFT_SILVER, TFT_BLACK);
-    _tft.setTextSize(1);
-
-    // Initialisation des chronos
-    _chronoDisplay = 0;
-}
-
-/// <summary>
-/// Met à jour l'affichage en cours
-/// </summary>
-/// <param name="currentDisplayScreenType"></param>
-/// <param name="displayHomeType"></param>
-void ROMV2_TFT::SetCurrentDisplay(DISPLAY_SCREEN_TYPE currentDisplayScreenType, DISPLAY_HOME_TYPE displayHomeType)
-{
-    _currentDisplayScreenType = currentDisplayScreenType;
-    _displayHomeType = displayHomeType;
+    // Positionnement ecran TFT
+    _tft.setRotation(1);
 }
 
 /// <summary>
@@ -138,6 +96,23 @@ void ROMV2_TFT::DisplaySplashApp()
 }
 
 /// <summary>
+/// Force la mise à jour complète de l'affichage
+/// </summary>
+void ROMV2_TFT::ForceRedraw()
+{
+    _displayHeader.ForceRedraw();
+    _displayHome.ForceRedraw();
+    _displayLux.ForceRedraw();
+    _displayEnvironment.ForceRedraw();
+    _displayIRTemp.ForceRedraw();
+    _displayAcceleration.ForceRedraw();
+    _displayGPS.ForceRedraw();
+    _displayNetwork.ForceRedraw();
+    _displayWifi.ForceRedraw();
+    _displayTSL2591Calibration.ForceRedraw();
+}
+
+/// <summary>
 /// Actualisation de l'affichage
 /// </summary>
 void ROMV2_TFT::UpdateDisplay()
@@ -165,35 +140,43 @@ void ROMV2_TFT::UpdateDisplay()
             // Actualisation du panneau principal
             switch (_currentDisplayScreenType)
             {
-                case DISPLAY_LUX:
-                    _displayLux.UpdateDisplay();
-                    break;
+            case DISPLAY_LUX:
+                _displayLux.UpdateDisplay();
+                break;
 
-                case DISPLAY_ENVIRONMENT:
-                    _displayEnvironment.UpdateDisplay();
-                    break;
+            case DISPLAY_ENVIRONMENT:
+                _displayEnvironment.UpdateDisplay();
+                break;
 
-                case DISPLAY_IRTEMP:
-                    _displayIRTemp.UpdateDisplay();
-                    break;
+            case DISPLAY_IRTEMP:
+                _displayIRTemp.UpdateDisplay();
+                break;
 
-                case DISPLAY_ACCELERATION:
-                    _displayAcceleration.UpdateDisplay();
-                    break;
+            case DISPLAY_ACCELERATION:
+                _displayAcceleration.UpdateDisplay();
+                break;
 
-                case DISPLAY_GPS:
-                    _displayGPS.UpdateDisplay();
-                    break;
+            case DISPLAY_GPS:
+                _displayGPS.UpdateDisplay();
+                break;
 
-                case DISPLAY_TSL2591_CALIBRATION:
-                    _displayTSL2591Calibration.UpdateDisplay();
-                    break;
+            case DISPLAY_NETWORK:
+                _displayNetwork.UpdateDisplay();
+                break;
 
-                case DISPLAY_HOME:
-                default:
-                    _displayHome.SetCurrentDisplay(_displayHomeType);
-                    _displayHome.UpdateDisplay();
-                    break;
+            case DISPLAY_WIFI:
+                _displayWifi.UpdateDisplay();
+                break;
+
+            case DISPLAY_TSL2591_CALIBRATION:
+                _displayTSL2591Calibration.UpdateDisplay();
+                break;
+
+            case DISPLAY_HOME:
+            default:
+                _displayHome.SetCurrentDisplay(_displayHomeType);
+                _displayHome.UpdateDisplay();
+                break;
             }
         }
 
@@ -201,59 +184,4 @@ void ROMV2_TFT::UpdateDisplay()
         _chronoDisplay = millis();
         _lastDisplayScreenType = _currentDisplayScreenType;
     }
-}
-
-/// <summary>
-/// Force la mise à jour complète de l'affichage
-/// </summary>
-void ROMV2_TFT::ForceRedraw()
-{
-    _displayHeader.ForceRedraw();
-    _displayHome.ForceRedraw();
-    _displayLux.ForceRedraw();
-    _displayEnvironment.ForceRedraw();
-    _displayIRTemp.ForceRedraw();
-    _displayAcceleration.ForceRedraw();
-    _displayGPS.ForceRedraw();
-    _displayTSL2591Calibration.ForceRedraw();
-}
-
-/// <summary>
-/// Affiche l'icone d'état de lecture de la luminosité
-/// </summary>
-void ROMV2_TFT::SetLuminosityIcon(bool on)
-{
-    _displayHeader.SetLuminosityIcon(on);
-}
-
-/// <summary>
-/// Met à jour la valeur courante de la calibration du TSL2591
-/// </summary>
-void ROMV2_TFT::SetNewCalibrationValue(int newCalibrationValue)
-{
-    _displayTSL2591Calibration.SetNewCalibrationValue(newCalibrationValue);
-}
-
-/// <summary>
-/// Augmente la calibration du TSL2591 de 0.01 si < TSL2591_CALIBRATION_MAX_VALUE
-/// </summary>
-void ROMV2_TFT::IncreaseCalibrationValue()
-{
-    _displayTSL2591Calibration.IncreaseCalibrationValue();
-}
-
-/// <summary>
-/// Diminue la calibration du TSL2591 de 0.01 si > TSL2591_CALIBRATION_MIN_VALUE
-/// </summary>
-void ROMV2_TFT::DecreaseCalibrationValue()
-{
-    _displayTSL2591Calibration.DecreaseCalibrationValue();
-}
-
-/// <summary>
-/// Renvoi la nouvelle valeur de la calibration du TSL2591
-/// </summary>
-int ROMV2_TFT::GetNewCalibrationValue()
-{
-    return _displayTSL2591Calibration.GetNewCalibrationValue();
 }
